@@ -58,7 +58,6 @@ public class CategoryBean implements Serializable {
         if (name != null && newName != null) {
             edited = categoryDao.editCategory(name, newName);
         }
-        System.out.println("########################## CategoryBean EDITED: " + edited);
         return edited;
     }
 

@@ -18,8 +18,6 @@ public class TaskService {
     UserBean userBean;
     @Inject
     TaskBean taskBean;
-    @Inject
-    CategoryBean categoryBean;
 
 @GET
 @Path("")

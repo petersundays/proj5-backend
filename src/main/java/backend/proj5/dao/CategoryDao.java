@@ -64,7 +64,6 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
         } else {
             try {
                 CategoryEntity categoryEntity = findCategoryByName(name);
-                System.out.println("*********************** " + categoryEntity.getName() + " ***********************");
                 if (categoryEntity != null) {
                     categoryEntity.setName(newName);
                     merge(categoryEntity);
@@ -74,7 +73,6 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
                 edited = false;
             }
         }
-        System.out.println("*********************** EDITED = " + edited + " ***********************");
         return edited;
     }
 }
