@@ -1,6 +1,5 @@
 package backend.proj5.service;
 
-import backend.proj5.bean.CategoryBean;
 import backend.proj5.bean.TaskBean;
 import backend.proj5.bean.UserBean;
 import backend.proj5.dto.Task;

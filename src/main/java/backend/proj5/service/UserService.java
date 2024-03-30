@@ -1,7 +1,6 @@
 package backend.proj5.service;
 
-import backend.proj5.bean.CategoryBean;
-import backend.proj5.bean.TaskBean;
+
 import backend.proj5.bean.UserBean;
 import backend.proj5.dto.*;
 import jakarta.inject.Inject;
@@ -9,7 +8,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Path("/users")
@@ -17,11 +15,6 @@ public class UserService {
 
     @Inject
     UserBean userBean;
-    @Inject
-    TaskBean taskBean;
-    @Inject
-    CategoryBean categoryBean;
-
 
     @POST
     @Path("/login")
@@ -51,7 +44,7 @@ public class UserService {
     }
 
     @POST
-    @Path("/register")
+    @Path("")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response registerUser(User user) {
@@ -82,74 +75,6 @@ public class UserService {
     }
 
     @GET
-    @Path("/getFirstName")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getFirstName(@HeaderParam("token") String token) {
-        Response response;
-
-        User currentUser = userBean.convertEntityByToken(token);
-
-        if (!userBean.isAuthenticated(token)) {
-            response = Response.status(401).entity("Invalid credentials").build();
-        } else {
-            response = Response.status(200).entity(currentUser.getFirstName()).build();
-        }
-        return response;
-    }
-
-    //Retorna o url da foto do token enviado
-    @GET
-    @Path("/getPhotoUrl")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getImage(@HeaderParam("token") String token) {
-        Response response;
-
-        User currentUser = userBean.convertEntityByToken(token);
-
-        if (!userBean.isAuthenticated(token)) {
-            response = Response.status(401).entity("Invalid credentials").build();
-        } else {
-            response = Response.status(200).entity(currentUser.getPhotoURL()).build();
-        }
-        return response;
-    }
-
-    //Retorna username do token enviado
-    @GET
-    @Path("/getUsername")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsername(@HeaderParam("token") String token) {
-        Response response;
-
-        User currentUser = userBean.convertEntityByToken(token);
-
-        if (!userBean.isAuthenticated(token)) {
-            response = Response.status(401).entity("Invalid credentials").build();
-        } else {
-            response = Response.status(200).entity(currentUser.getUsername()).build();
-        }
-        return response;
-    }
-
-
-    //Retorna tipo de user do token enviado
-    @GET
-    @Path("/getTypeOfUser")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getTypeOfUser(@HeaderParam("token") String token) {
-        Response response;
-
-        User currentUser = userBean.convertEntityByToken(token);
-
-        if (!userBean.isAuthenticated(token)) {
-            response = Response.status(401).entity("Invalid credentials").build();
-        } else {
-            response = Response.status(200).entity(currentUser.getTypeOfUser()).build();
-        }
-        return response;
-    }
-
-    @GET
     @Path("/getUsernameFromEmail")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsernameFromEmail(@HeaderParam("email") String email, @HeaderParam("token") String token) {
@@ -165,9 +90,8 @@ public class UserService {
         return response;
     }
 
-    //Atualizar um user
     @PUT
-    @Path("/update-profile/{username}")
+    @Path("/{username}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateUser(@PathParam("username") String username, @HeaderParam("token") String token, User user) {
@@ -203,21 +127,18 @@ public class UserService {
 
 
     @PUT
-    @Path("/update/{username}/password")
+    @Path("/{username}/password")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updatePassword(@PathParam("username") String username,
                                    @HeaderParam("token") String token,
                                    @HeaderParam("oldpassword") String oldPassword,
                                    @HeaderParam("newpassword") String newPassword) {
 
-        //Verica se user está autentificado
         if (userBean.isAuthenticated(token)){
-            // Verificar password antiga
             boolean isOldPasswordValid = userBean.verifyOldPassword(username, oldPassword);
             if (!isOldPasswordValid) {
                 return Response.status(401).entity("Current password is incorrect").build();
             }
-            // Se a password antiga é válida, update a password
             boolean updated = userBean.updatePassword(username, newPassword);
             if (!updated) {
                 return Response.status(400).entity("User with this username is not found").build();
@@ -227,7 +148,7 @@ public class UserService {
     }
 
     @PUT
-    @Path("/update/{username}/visibility")
+    @Path("{username}/visibility")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateVisibility(@PathParam("username") String username, @HeaderParam("token") String token) {
@@ -235,13 +156,11 @@ public class UserService {
 
         User user = userBean.getUser(username);
 
-        //Verifica se o username existe na base de dados
         if (user==null){
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
             return response;
         }
 
-        //Verifica se token de quem consulta existe e se é Product Owner
         if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
 
             userBean.updateUserEntityVisibility(username);
@@ -253,39 +172,7 @@ public class UserService {
         return response;
     }
 
-    //Atualizar tipo de user
-    @PUT
-    @Path("/update/{username}/role")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateRole(@PathParam("username") String username, @HeaderParam("token") String token, @HeaderParam("typeOfUser") int typeOfUser) {
-        Response response;
 
-        User user = userBean.getUser(username);
-
-        //Verifica se o username existe na base de dados
-        if (user==null){
-            response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
-            return response;
-        }
-
-        //Verifica se token existe de quem consulta e se é Product Owner
-        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
-
-            if (typeOfUser == 100 || typeOfUser == 200 || typeOfUser == 300) {
-
-                boolean updatedRole = userBean.updateUserEntityRole(username, typeOfUser);
-                response = Response.status(Response.Status.OK).entity("Role updated with success").build(); //status code 200
-            }else response = Response.status(401).entity("Invalid type of User").build();
-
-        }else {
-            response = Response.status(401).entity("Invalid credentials").build();
-        }
-
-        return response;
-    }
-
-    //Apagar um user
     @DELETE
     @Path("/{username}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -307,7 +194,7 @@ public class UserService {
     }
 
     @GET
-    @Path("/all")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token) {
         Response response;
@@ -321,7 +208,7 @@ public class UserService {
     }
 
     @GET
-    @Path("/all/visible/{visible}")
+    @Path("{visible}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsersByVisibility(@HeaderParam("token") String token, @PathParam("visible") boolean visible) {
         Response response;
@@ -335,7 +222,7 @@ public class UserService {
     }
 
     @GET
-    @Path("/all/{type}")
+    @Path("{type}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser) {
         Response response;
@@ -349,7 +236,7 @@ public class UserService {
     }
 
     @GET
-    @Path("/all/{type}/{visible}")
+    @Path("{type}/{visible}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser, @PathParam("visible") boolean visible) {
         Response response;
