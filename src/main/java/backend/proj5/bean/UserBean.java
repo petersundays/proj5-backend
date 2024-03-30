@@ -402,21 +402,6 @@ public class UserBean implements Serializable {
         return status;
     }
 
-    public boolean updateUserEntityRole(String username, int typeOfUser) {
-        boolean status = false;
-
-        UserEntity u = userDao.findUserByUsername(username);
-
-        if (u != null && u.getTypeOfUser() != typeOfUser){
-
-            u.setTypeOfUser(typeOfUser);
-
-            status = true;
-        }
-
-        return status;
-    }
-
     public boolean isAuthenticated(String token) {
 
         boolean validUser = false;
@@ -588,26 +573,6 @@ public class UserBean implements Serializable {
     }
 
 
-    public ArrayList<Task> getUserAndHisTasks(String username) {
-
-        UserEntity u = userDao.findUserByUsername(username);
-
-        if (u != null) {
-            ArrayList<TaskEntity> taskEntities = taskDao.findTasksByUser(u);
-            if (taskEntities != null) {
-                ArrayList<Task> userTasks = new ArrayList<>();
-                for (TaskEntity taskEntity : taskEntities) {
-
-                    userTasks.add(convertTaskEntitytoTaskDto(taskEntity));
-
-                }
-                return userTasks;
-            }
-        }
-        //Retorna uma lista vazia se não forem encontradas tarefas
-        return new ArrayList<>();
-    }
-
     public boolean userIsTaskOwner(String token, String id) {
         UserEntity userEntity = userDao.findUserByToken(token);
         TaskEntity taskEntity = taskDao.findTaskById(id);
@@ -653,42 +618,8 @@ public class UserBean implements Serializable {
         return authorized;
     }
 
-/*    public boolean addTaskToUser(String username, Task temporaryTask) {
-        TaskBean taskBean = new TaskBean();
-        boolean done = taskBean.newTask(temporaryTask);
-        if (done) {
-            getUserAndHisTasks(username).add(temporaryTask);
-        }
-        return done;
-    }*/
 
-    /*public boolean updateTask(String username, Task task) {
-        TaskBean taskBean = new TaskBean();
-        boolean updated = false;
-
-        if (taskBean.editTask(task, getUserAndHisTasks(username))) {
-            //writeIntoJsonFile();
-            updated = true;
-        }
-        return updated;
-    }*/
-
-    //Chamar método no Bean
-
-
-    //Converte a Entidade com o token "token" para DTO
-    public User convertEntityByToken (String token){
-
-        UserEntity currentUserEntity = userDao.findUserByToken(token);
-        User currentUser = convertUserEntitytoUserDto(currentUserEntity);
-
-        if (currentUser != null){
-            return currentUser;
-        }else return null;
-
-    }
-
-    //Converte a Entidade com o email "email" para DTO
+        //Converte a Entidade com o email "email" para DTO
     public User convertEntityByEmail (String email){
 
         UserEntity userEntity = userDao.findUserByEmail(email);
