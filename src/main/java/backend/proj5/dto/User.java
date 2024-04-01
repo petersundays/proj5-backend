@@ -28,6 +28,8 @@ public class User {
     @XmlElement
     int numberOfTasks;
     @XmlElement
+    boolean confirmed;
+    @XmlElement
     public static final int DEVELOPER = 100;
     @XmlElement
     public static final int SCRUMMASTER = 200;
@@ -112,16 +114,6 @@ public class User {
         this.typeOfUser = DEVELOPER;
     }
 
-    public void editTypeOfUser(int stateId) {
-         if (stateId == SCRUMMASTER) {
-            this.typeOfUser = SCRUMMASTER;
-        } else if (stateId == PRODUCTOWNER) {
-            this.typeOfUser = PRODUCTOWNER;
-        } else {
-            this.typeOfUser = DEVELOPER;
-        }
-    }
-
     public String getToken() {
         return token;
     }
@@ -136,6 +128,14 @@ public class User {
 
     public void setNumberOfTasks(int numberOfTasks) {
         this.numberOfTasks = numberOfTasks;
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
     }
 
     @Override
