@@ -52,9 +52,9 @@ public class UserService {
 
         boolean isUsernameAvailable = userBean.isUsernameAvailable(user);
         boolean isEmailValid = userBean.isEmailValid(user);
-        boolean isFieldEmpty = userBean.isAnyFieldEmpty(user);
         boolean isPhoneNumberValid = userBean.isPhoneNumberValid(user);
-        boolean isImageValid = userBean.isImageUrlValid(user.getPhotoURL());
+        userBean.validatePhotoUrl(user);
+        boolean isFieldEmpty = userBean.isAnyFieldEmpty(user);
 
         if (isFieldEmpty) {
             response = Response.status(422).entity("There's an empty field. All fields must be filled in").build();
@@ -62,8 +62,6 @@ public class UserService {
             response = Response.status(422).entity("Invalid email").build();
         } else if (!isUsernameAvailable) {
             response = Response.status(Response.Status.CONFLICT).entity("Username already in use").build(); //status code 409
-        } else if (!isImageValid) {
-            response = Response.status(422).entity("Image URL invalid").build(); //400
         } else if (!isPhoneNumberValid) {
             response = Response.status(422).entity("Invalid phone number").build();
         } else if (userBean.register(user)) {
@@ -95,7 +93,7 @@ public class UserService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateUser(@PathParam("username") String username, @HeaderParam("token") String token, User user) {
-        System.out.println("****************** USER " + user);
+
         Response response;
 
         User userUpdate = userBean.getUser(username);

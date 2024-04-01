@@ -32,8 +32,6 @@ public class UserBean implements Serializable {
     @EJB
     private CategoryBean categoryBean;
 
-
-    //Construtor vazio
     public UserBean(){}
 
     public UserBean(UserDao userDao) {
@@ -52,8 +50,10 @@ public class UserBean implements Serializable {
             admin.setPhone("123456789");
             admin.setPhotoURL("https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png");
             admin.setVisible(false);
+            admin.setConfirmed(true);
 
             register(admin);
+            System.out.println("Admin created" + admin);
         }
 
         UserEntity userEntity2 = userDao.findUserByUsername("NOTASSIGNED");
@@ -68,21 +68,27 @@ public class UserBean implements Serializable {
             deletedUser.setPhotoURL("https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png");
             deletedUser.setTypeOfUser(400);
             deletedUser.setVisible(false);
+            deletedUser.setConfirmed(true);
 
             register(deletedUser);
+
         }
     }
 
     //Permite ao utilizador entrar na app, gera token
     public User login(Login user) {
         UserEntity userEntity = userDao.findUserByUsername(user.getUsername());
-        if (userEntity != null && userEntity.isVisible()) {
+        if (userEntity != null && userEntity.isVisible() && userEntity.isConfirmed()) {
             //Verifica se a password coincide com a password encriptada
             if (BCrypt.checkpw(user.getPassword(), userEntity.getPassword())) {
                 String token = generateNewToken();
                 userEntity.setToken(token);
                 User userDto = convertUserEntitytoUserDto(userEntity);
                 return createUserLogged(userDto);
+            }
+        } else if (userEntity != null && userEntity.isVisible() && !userEntity.isConfirmed()) {
+            if (BCrypt.checkpw(user.getPassword(), userEntity.getPassword())) {
+                return convertUserEntitytoUserDto(userEntity);
             }
         }
         return null;
@@ -94,9 +100,9 @@ public class UserBean implements Serializable {
         if (user != null) {
             if (user.getUsername().equalsIgnoreCase("notAssigned")) {
                 user.setUsername(user.getUsername().toUpperCase());
-                user.setVisible(false);
                 user.setTypeOfUser(User.NOTASSIGNED);
-                user.setNumberOfTasks(0);
+                user.setVisible(false);
+                user.setConfirmed(true);
 
                 //Encripta a password usando BCrypt
                 String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
@@ -111,9 +117,13 @@ public class UserBean implements Serializable {
             } else {
                 if (user.getUsername().equals("admin")){
                     user.setTypeOfUser(300);
-                }else{
+                    user.setVisible(true);
+                    user.setConfirmed(true);
+
+                } else {
                     if (user.getTypeOfUser() != 100 && user.getTypeOfUser() != 200 && user.getTypeOfUser() != 300) {
                         user.setInitialTypeOfUser();
+
                     } else {
                         if (user.getTypeOfUser() == 100) {
                             user.setTypeOfUser(User.DEVELOPER);
@@ -123,9 +133,10 @@ public class UserBean implements Serializable {
                             user.setTypeOfUser(User.PRODUCTOWNER);
                         }
                     }
-                }
 
-                user.setVisible(true);
+                    user.setVisible(true);
+                    user.setConfirmed(false);
+                }
 
                 //Encripta a password usando BCrypt
                 String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
@@ -144,7 +155,6 @@ public class UserBean implements Serializable {
 
 
     //Apaga todos os registos do utilizador da base de dados
-    //Verificar tarefas!!!!!!!
     public boolean delete(String username) {
 
         UserEntity u = userDao.findUserByUsername(username);
@@ -180,6 +190,7 @@ public class UserBean implements Serializable {
         userEntity.setPhone(user.getPhone());
         userEntity.setPhotoURL(user.getPhotoURL());
         userEntity.setVisible(user.isVisible());
+        userEntity.setConfirmed(user.isConfirmed());
 
         return userEntity;
     }
@@ -196,6 +207,7 @@ public class UserBean implements Serializable {
         user.setPhotoURL(userEntity.getPhotoURL());
         user.setVisible(userEntity.isVisible());
         user.setNumberOfTasks(taskBean.getNumberOfTasksFromUser(userEntity.getUsername()));
+        user.setConfirmed(userEntity.isConfirmed());
         if (userEntity.getToken() != null) {
             user.setToken(userEntity.getToken());
         } else {
@@ -203,22 +215,6 @@ public class UserBean implements Serializable {
         }
 
         return user;
-    }
-
-    public Task convertTaskEntitytoTaskDto(TaskEntity taskEntity) {
-        Task t = new Task();
-        t.setId(taskEntity.getId());
-        t.setOwner(convertUserEntitytoUserDto(taskEntity.getOwner()));
-        t.setTitle(taskEntity.getTitle());
-        t.setDescription(taskEntity.getDescription());
-        t.setStateId(taskEntity.getStateId());
-        t.setPriority(taskEntity.getPriority());
-        t.setStartDate(taskEntity.getStartDate());
-        t.setLimitDate(taskEntity.getLimitDate());
-        t.setCategory(categoryBean.convertCategoryEntityToCategoryDto(taskEntity.getCategory()));
-        t.setErased(taskEntity.getErased());
-
-        return t;
     }
 
 
@@ -342,6 +338,8 @@ public class UserBean implements Serializable {
         userLogged.setPhotoURL(user.getPhotoURL());
         userLogged.setTypeOfUser(user.getTypeOfUser());
         userLogged.setToken(user.getToken());
+        userLogged.setVisible(user.isVisible());
+        userLogged.setConfirmed(user.isConfirmed());
         return userLogged;
     }
 
@@ -533,23 +531,24 @@ public class UserBean implements Serializable {
         return status;
     }
 
-    public boolean isImageUrlValid(String url) {
-        boolean status = true;
+    public void validatePhotoUrl(User user) {
 
-        if (url == null) {
-            url = "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTWfm4QX7YF7orMboLv4jjuwoYgd85bKBqeiBHLOfS6MgfHUW-d";
-        }
+        String defaultUrl = "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTWfm4QX7YF7orMboLv4jjuwoYgd85bKBqeiBHLOfS6MgfHUW-d";
+        String url = user.getPhotoURL();
 
-        try {
-            BufferedImage img = ImageIO.read(new URL(url));
-            if (img == null) {
-                status = false;
+        if (url == null || url.isEmpty() || url.isBlank()){
+            user.setPhotoURL(defaultUrl);
+        } else {
+            try {
+                BufferedImage img = ImageIO.read(new URL(url));
+                if (img == null) {
+                    user.setPhotoURL(defaultUrl);
+                }
+            } catch (IOException e) {
+                user.setPhotoURL(defaultUrl);
             }
-        } catch (IOException e) {
-            status = false;
         }
 
-        return status;
     }
 
     public boolean isImageUrlUpdatedValid(String url) {
