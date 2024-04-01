@@ -140,4 +140,29 @@ public boolean eraseAllNotErasedTasks() {
 		return deleted;
 	}
 
+	// Está a fazer o cast para Number e depois para int, porque ao fazer diretamente para int não retornava nada,
+	// por causa do tipo de retorno do método getSingleResult() que é Object e não int.
+	public int numberOfTasksFromUser(UserEntity owner) {
+		try {
+			Number result = (Number) em.createNamedQuery("Task.numberOfTasksFromUser")
+					.setParameter("owner", owner)
+					.getSingleResult();
+			return result.intValue();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public int numberOfTasksFromUserByState(UserEntity owner, int stateId) {
+		try {
+			Number result = (Number) em.createNamedQuery("Task.numberOfTasksFromUserByState")
+					.setParameter("owner", owner)
+					.setParameter("stateId", stateId)
+					.getSingleResult();
+			return result.intValue();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
 }
