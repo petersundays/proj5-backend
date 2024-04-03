@@ -311,5 +311,15 @@ public class TaskBean implements Serializable {
     }
 
 
+    public int numberOfTasksFromUser(String username) {
+
+        UserEntity userEntity = userDao.findUserByUsername(username);
+        return taskDao.numberOfTasksFromUser(userEntity);
+    }
+
+    public int numberOfTasksByState(String username, int stateId) {
+        UserEntity userEntity = userDao.findUserByUsername(username);
+        return taskDao.numberOfTasksFromUserByState(userEntity, stateId);
+    }
 
 }

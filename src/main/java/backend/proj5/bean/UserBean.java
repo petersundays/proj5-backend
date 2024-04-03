@@ -400,6 +400,21 @@ public class UserBean implements Serializable {
         return status;
     }
 
+    public boolean updateUserEntityConfirmation(String email) {
+        boolean status = false;
+
+        UserEntity u = userDao.findUserByEmail(email);
+
+        if (u != null){
+
+            u.setConfirmed(true);
+
+            status = true;
+        }
+
+        return status;
+    }
+
     public boolean isAuthenticated(String token) {
 
         boolean validUser = false;

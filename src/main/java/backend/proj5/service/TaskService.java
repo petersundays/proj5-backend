@@ -74,7 +74,7 @@ public Response getAllTasks(@HeaderParam("token") String token) {
                     response = Response.status(404).entity("Something went wrong. A new category was not created.").build();
                 }
             } else {
-                response = Response.status(Response.Status.BAD_REQUEST).entity("Invalid username on path").build();
+                response = Response.status(Response.Status.BAD_REQUEST).entity("Username and token don't match").build();
             }
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
@@ -379,6 +379,34 @@ public Response getAllTasks(@HeaderParam("token") String token) {
             } else {
                 response = Response.status(403).entity("You don't have permission for this request").build();
             }
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/{username}/atributed")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAtributedTasks(@HeaderParam("token") String token, @PathParam("username") String username) {
+        Response response;
+        if (userBean.isAuthenticated(token)) {
+            int atributedTasks = taskBean.numberOfTasksFromUser(username);
+            response = Response.status(200).entity(atributedTasks).build();
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/{username}/{stateId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAtributedTasksByState(@HeaderParam("token") String token, @PathParam("username") String username, @PathParam("stateId") int stateId) {
+        Response response;
+        if (userBean.isAuthenticated(token)) {
+            int atributedTasks = taskBean.numberOfTasksByState(username, stateId);
+            response = Response.status(200).entity(atributedTasks).build();
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }

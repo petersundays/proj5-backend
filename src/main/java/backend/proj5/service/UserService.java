@@ -250,36 +250,37 @@ public class UserService {
     @GET
     @Path("/{username}")
     @Produces(MediaType.APPLICATION_JSON)
-        public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token) {
+    public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token) {
         Response response;
-
-        User userSearched = userBean.getUser(username);
-
-        //Verifica se o username existe na base de dados
-        if (userSearched==null){
-            response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
-            return response;
-        }
-
-        //Verifica se o token é igual ao username pesquisado
-        if (userBean.thisTokenIsFromThisUsername(token,username)) {
-
-            response = Response.ok().entity(userSearched).build();
-
-        }else {
-            //Verifica se token existe de quem consulta
-            if (userBean.isAuthenticated(token)) {
-                if (userBean.userIsScrumMaster(token) || userBean.userIsProductOwner(token)) {
-
-                    response = Response.ok().entity(userSearched).build();
-                } else {
-                    response = Response.status(Response.Status.BAD_REQUEST).entity("Invalid username on path").build();
-                }
+        if (userBean.isAuthenticated(token)) {
+            User user = userBean.getUser(username);
+            if (user != null) {
+                response = Response.status(200).entity(user).build();
             } else {
-                response = Response.status(401).entity("Invalid credentials").build();
+                response = Response.status(404).entity("User not found").build();
             }
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
         }
         return response;
     }
 
+    @PUT
+    @Path("/email/confirm")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response confirmUser(@HeaderParam("email") String email) {
+
+/* O PATH ESTÁ DESTA FORMA EM VEZ DE 'confirm-registration', PQ NO FRONTEND DAVA SEMPRE ERRO APESAR DE FUNCIONAR NO POSTMAN */
+
+        Response response;
+
+        boolean confirmed = userBean.updateUserEntityConfirmation(email);
+
+        if (confirmed) {
+            response = Response.status(200).entity("User confirmed").build();
+        } else {
+            response = Response.status(404).entity("User not found").build();
+        }
+        return response;
+    }
 }
