@@ -29,8 +29,6 @@ public class UserBean implements Serializable {
     private TaskDao taskDao;
     @EJB
     private TaskBean taskBean;
-    @EJB
-    private CategoryBean categoryBean;
 
     public UserBean(){}
 
@@ -306,16 +304,6 @@ public class UserBean implements Serializable {
         //Retorna uma lista vazia se não forem encontradas tarefas
         return new ArrayList<>();
     }
-
-    /*public boolean addUser(User user) {
-
-        boolean status = false;
-        if (users.add(user)) {
-            status = true;
-        }
-        writeIntoJsonFile();
-        return status;
-    }*/
 
     public User getUser(String username) {
 
@@ -651,6 +639,14 @@ public class UserBean implements Serializable {
             return true;
         }else return false;
 
+    }
+
+    public User getUserByToken(String token) {
+        UserEntity userEntity = userDao.findUserByToken(token);
+        if (userEntity != null) {
+            return convertUserEntitytoUserDto(userEntity);
+        }
+        return null;
     }
 
     public boolean verifyOldPassword(String username, String oldPassword){
