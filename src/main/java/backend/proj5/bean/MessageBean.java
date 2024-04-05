@@ -25,11 +25,11 @@ public class MessageBean implements Serializable {
     public MessageBean() {
     }
 
-    public boolean sendMessage(String content, String sender, String receiver) {
+    public boolean sendMessage(String content, String sender, String receiver, String token) {
         boolean sent = false;
 
-        User senderUser = userBean.getUser(sender);
-        User receiverUser = userBean.getUser(receiver);
+        User senderUser = userBean.getUser(sender, token);
+        User receiverUser = userBean.getUser(receiver, token);
 
         if(senderUser != null && receiverUser != null) {
             Message message = new Message(content, senderUser, receiverUser);

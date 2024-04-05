@@ -64,10 +64,15 @@ public class UserService {
             response = Response.status(Response.Status.CONFLICT).entity("Username already in use").build(); //status code 409
         } else if (!isPhoneNumberValid) {
             response = Response.status(422).entity("Invalid phone number").build();
-        } else if (userBean.register(user)) {
-            response = Response.status(Response.Status.CREATED).entity("User registered successfully").build(); //status code 201
+        } else if (userBean.sendConfirmationEmail(user)) {
+            boolean register = userBean.register(user);
+            if (!register) {
+                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to register user").build(); //status code 500
+            } else {
+                response = Response.status(Response.Status.CREATED).entity("User registered successfully").build(); //status code 201
+            }
         } else {
-            response = Response.status(Response.Status.BAD_REQUEST).entity("Something went wrong").build(); //status code 400
+            response = Response.status(Response.Status.BAD_REQUEST).entity("Something went wrong while sending confirmation email").build(); //status code 400
         }
         return response;
     }
@@ -96,7 +101,7 @@ public class UserService {
 
         Response response;
 
-        User userUpdate = userBean.getUser(username);
+        User userUpdate = userBean.getUser(username, token);
 
         if (userUpdate==null){
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
@@ -152,7 +157,7 @@ public class UserService {
     public Response updateVisibility(@PathParam("username") String username, @HeaderParam("token") String token) {
         Response response;
 
-        User user = userBean.getUser(username);
+        User user = userBean.getUser(username, token);
 
         if (user==null){
             response = Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
@@ -205,8 +210,10 @@ public class UserService {
         return response;
     }
 
+    //PATHestá desta forma e não 'visibility/{visible}', pq o pedido "getUser" nem sempre funcionava
+    // dava erro "multiple resources" com este pedido e com o"getUsers"
     @GET
-    @Path("{visible}")
+    @Path("/visibility/{visible}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsersByVisibility(@HeaderParam("token") String token, @PathParam("visible") boolean visible) {
         Response response;
@@ -219,8 +226,10 @@ public class UserService {
         return response;
     }
 
+    //PATH está desta forma e não '{type}', pq o pedido "getUser" nem sempre funcionava
+    // dava erro "multiple resources" com este pedido e com o"getUsersByVisibility"
     @GET
-    @Path("{type}")
+    @Path("/role/{type}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token, @PathParam("type") int typeOfUser) {
         Response response;
@@ -253,7 +262,7 @@ public class UserService {
     public Response getUser(@PathParam("username") String username, @HeaderParam("token") String token) {
         Response response;
         if (userBean.isAuthenticated(token)) {
-            User user = userBean.getUser(username);
+            User user = userBean.getUser(username, token);
             if (user != null) {
                 response = Response.status(200).entity(user).build();
             } else {

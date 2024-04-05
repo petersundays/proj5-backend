@@ -26,7 +26,7 @@ public class MessageService {
         Response response;
 
         if(userBean.isAuthenticated(token)) {
-            messageBean.sendMessage(content, userBean.getUserByToken(token).getUsername(), receiver);
+            messageBean.sendMessage(content, userBean.getUserByToken(token).getUsername(), receiver, token);
             response = Response.status(Response.Status.OK).build();
         } else {
             response = Response.status(Response.Status.UNAUTHORIZED).build();

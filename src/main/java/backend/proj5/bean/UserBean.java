@@ -29,6 +29,8 @@ public class UserBean implements Serializable {
     private TaskDao taskDao;
     @EJB
     private TaskBean taskBean;
+    @EJB
+    private EmailBean emailBean;
 
     public UserBean(){}
 
@@ -149,6 +151,20 @@ public class UserBean implements Serializable {
         } else {
             return false;
         }
+    }
+
+    public boolean sendConfirmationEmail(User user) {
+
+        System.out.println("Sending email to " + user.getEmail());
+
+        String userEmail = user.getEmail();
+        String subject = "Account Confirmation";
+        String confirmationLink = "http://example.com/confirm-account?email=" + userEmail;
+        String body = "Dear " + user.getFirstName() + ",\n\n"
+                + "Thank you for registering with us. Please click on the link below to confirm your account.\n\n"
+                + "Confirmation Link: " + confirmationLink;
+
+        return emailBean.sendEmail(userEmail, subject, body);
     }
 
 
@@ -305,15 +321,20 @@ public class UserBean implements Serializable {
         return new ArrayList<>();
     }
 
-    public User getUser(String username) {
+    public User getUser(String username, String token) {
 
         UserEntity u = userDao.findUserByUsername(username);
+        UserEntity userLogged = userDao.findUserByToken(token);
 
-        if (u!=null){
-            return convertUserEntitytoUserDto(u);
+        if (u !=null) {
+            if ((u.getTypeOfUser() == 400 || !u.isVisible() || !u.isConfirmed()) && userLogged.getTypeOfUser() != 300) {
+                return convertUserEntitytoUserDto(userLogged);
+            } else {
+                return convertUserEntitytoUserDto(u);
+            }
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     public User createUserLogged(User user) {
@@ -621,7 +642,7 @@ public class UserBean implements Serializable {
     }
 
 
-        //Converte a Entidade com o email "email" para DTO
+    //Converte a Entidade com o email "email" para DTO
     public User convertEntityByEmail (String email){
 
         UserEntity userEntity = userDao.findUserByEmail(email);
