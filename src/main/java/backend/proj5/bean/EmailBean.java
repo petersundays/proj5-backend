@@ -1,6 +1,8 @@
 package backend.proj5.bean;
 
+import backend.proj5.dao.UserDao;
 import backend.proj5.dto.User;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
@@ -11,6 +13,9 @@ import java.util.Properties;
 
 @Stateless
 public class EmailBean {
+
+    @EJB
+    private UserBean userBean;
 
     private final String username = "pedro_domingos10@hotmail.com";
     private final String password = System.getenv("SMTP_PASSWORD");
@@ -54,7 +59,7 @@ public class EmailBean {
 
     public boolean sendConfirmationEmail(User user) {
 
-        System.out.println("Sending email to " + user.getEmail());
+        boolean sent = false;
 
         String userEmail = user.getEmail();
         String subject = "Agile Scrum - Account Confirmation";
@@ -63,6 +68,11 @@ public class EmailBean {
                 + "Thank you for registering with us. Please click on the link below to confirm your account.\n\n"
                 + "Confirmation Link: " + confirmationLink;
 
-        return sendEmail(userEmail, subject, body);
+        if (sendEmail(userEmail, subject, body)) {
+            sent = true;
+        } else {
+            userBean.delete(user.getUsername());
+        }
+        return sent;
     }
 }
