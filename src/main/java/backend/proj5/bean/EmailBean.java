@@ -1,5 +1,6 @@
 package backend.proj5.bean;
 
+import backend.proj5.dto.User;
 import jakarta.ejb.Stateless;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
@@ -13,7 +14,7 @@ public class EmailBean {
 
     private final String username = "pedro_domingos10@hotmail.com";
     private final String password = System.getenv("SMTP_PASSWORD");
-    private final String host = "smtp.live.com";
+    private final String host = "smtp-mail.outlook.com";
     private final int port = 587;
 
     public EmailBean() {}
@@ -49,5 +50,19 @@ public class EmailBean {
         }
 
         return sent;
+    }
+
+    public boolean sendConfirmationEmail(User user) {
+
+        System.out.println("Sending email to " + user.getEmail());
+
+        String userEmail = user.getEmail();
+        String subject = "Agile Scrum - Account Confirmation";
+        String confirmationLink = "http://example.com/confirm-account?email=" + userEmail;
+        String body = "Dear " + user.getFirstName() + ",\n\n"
+                + "Thank you for registering with us. Please click on the link below to confirm your account.\n\n"
+                + "Confirmation Link: " + confirmationLink;
+
+        return sendEmail(userEmail, subject, body);
     }
 }

@@ -1,6 +1,7 @@
 package backend.proj5.service;
 
 
+import backend.proj5.bean.EmailBean;
 import backend.proj5.bean.UserBean;
 import backend.proj5.dto.*;
 import jakarta.inject.Inject;
@@ -15,6 +16,8 @@ public class UserService {
 
     @Inject
     UserBean userBean;
+    @Inject
+    EmailBean emailBean;
 
     @POST
     @Path("/login")
@@ -64,7 +67,7 @@ public class UserService {
             response = Response.status(Response.Status.CONFLICT).entity("Username already in use").build(); //status code 409
         } else if (!isPhoneNumberValid) {
             response = Response.status(422).entity("Invalid phone number").build();
-        } else if (userBean.sendConfirmationEmail(user)) {
+        } else if (emailBean.sendConfirmationEmail(user)) {
             boolean register = userBean.register(user);
             if (!register) {
                 response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to register user").build(); //status code 500
