@@ -82,16 +82,17 @@ public class UserService {
     @GET
     @Path("/getUsernameFromEmail")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsernameFromEmail(@HeaderParam("email") String email, @HeaderParam("token") String token) {
+    public Response getUsernameFromEmail(@HeaderParam("email") String email) {
         Response response;
 
         User user = userBean.convertEntityByEmail(email);
 
-        if (!userBean.isAuthenticated(token)) {
-            response = Response.status(401).entity("Invalid credentials").build();
+        if (user == null) {
+            response = Response.status(404).entity("User not found").build();
         } else {
-            response = Response.status(200).entity(user.getUsername()).build();
+            response = Response.status(200).entity(user).build();
         }
+
         return response;
     }
 
@@ -151,6 +152,21 @@ public class UserService {
         }else
             return Response.status(401).entity("User is not logged in").build();
     }
+
+
+    @PUT
+    @Path("/set/password")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response setInitialPassword(@HeaderParam("email") String email,
+                                       @HeaderParam("password") String password) {
+        boolean passwordSet = userBean.setInitialPassword(email, password);
+            if (!passwordSet) {
+                return Response.status(400).entity("User with this email is not found").build();
+            } else {
+                return Response.status(200).entity("Password updated").build();
+            }
+    }
+
 
     @PUT
     @Path("{username}/visibility")
