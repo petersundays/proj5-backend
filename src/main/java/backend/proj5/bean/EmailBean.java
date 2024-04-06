@@ -63,7 +63,7 @@ public class EmailBean {
 
         String userEmail = user.getEmail();
         String subject = "Agile Scrum - Account Confirmation";
-        String confirmationLink = "http://example.com/confirm-account?email=" + userEmail;
+        String confirmationLink = "http://localhost:5173/confirm/" + userEmail;
         String body = "Dear " + user.getFirstName() + ",\n\n"
                 + "Thank you for registering with us. Please click on the link below to confirm your account.\n\n"
                 + "Confirmation Link: " + confirmationLink;

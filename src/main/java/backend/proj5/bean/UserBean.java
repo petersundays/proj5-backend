@@ -410,7 +410,7 @@ public class UserBean implements Serializable {
 
         UserEntity u = userDao.findUserByEmail(email);
 
-        if (u != null){
+        if (u != null && !u.isConfirmed()){
 
             u.setConfirmed(true);
 
@@ -680,6 +680,19 @@ public class UserBean implements Serializable {
         if (user != null) {
             //Encripta a password usando BCrypt
             String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+
+            //Define a password encriptada
+            user.setPassword(hashedPassword);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean setInitialPassword (String email, String password) {
+        UserEntity user = userDao.findUserByEmail(email);
+        if (user != null && !user.getPassword().trim().isEmpty()) {
+            //Encripta a password usando BCrypt
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
             //Define a password encriptada
             user.setPassword(hashedPassword);
