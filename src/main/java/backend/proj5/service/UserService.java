@@ -67,15 +67,14 @@ public class UserService {
             response = Response.status(Response.Status.CONFLICT).entity("Username already in use").build(); //status code 409
         } else if (!isPhoneNumberValid) {
             response = Response.status(422).entity("Invalid phone number").build();
-        } else if (emailBean.sendConfirmationEmail(user)) {
-            boolean register = userBean.register(user);
-            if (!register) {
-                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Unable to register user").build(); //status code 500
-            } else {
+        } else if (userBean.register(user)) {
+            if (emailBean.sendConfirmationEmail(user)) {
                 response = Response.status(Response.Status.CREATED).entity("User registered successfully").build(); //status code 201
+            } else {
+                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Email not sent").build(); //status code 500
             }
         } else {
-            response = Response.status(Response.Status.BAD_REQUEST).entity("Something went wrong while sending confirmation email").build(); //status code 400
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("User not registered").build(); //status code 500
         }
         return response;
     }

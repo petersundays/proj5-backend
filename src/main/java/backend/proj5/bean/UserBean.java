@@ -3,7 +3,6 @@ package backend.proj5.bean;
 import backend.proj5.dao.TaskDao;
 import backend.proj5.dao.UserDao;
 import backend.proj5.dto.Login;
-import backend.proj5.dto.Task;
 import backend.proj5.dto.User;
 import backend.proj5.entity.TaskEntity;
 import backend.proj5.entity.UserEntity;
@@ -87,8 +86,12 @@ public class UserBean implements Serializable {
                 return createUserLogged(userDto);
             }
         } else if (userEntity != null && userEntity.isVisible() && !userEntity.isConfirmed()) {
-            if (BCrypt.checkpw(user.getPassword(), userEntity.getPassword())) {
+            if (userEntity.getPassword().trim().isEmpty()) {
                 return convertUserEntitytoUserDto(userEntity);
+            } else {
+                if (BCrypt.checkpw(user.getPassword(), userEntity.getPassword())) {
+                    return convertUserEntitytoUserDto(userEntity);
+                }
             }
         }
         return null;
@@ -138,12 +141,19 @@ public class UserBean implements Serializable {
                     user.setConfirmed(false);
                 }
 
-                //Encripta a password usando BCrypt
-                String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+                if (user.getPassword() == null || user.getPassword().isEmpty() || user.getPassword().isBlank()) {
+                    System.out.println("Password is empty");
+                    user.setPassword("");
+                    System.out.println(user.getPassword());
 
-                //Define a password encriptada
-                user.setPassword(hashedPassword);
+                } else {
 
+                    //Encripta a password usando BCrypt
+                    String hashedPassword = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+
+                    //Define a password encriptada
+                    user.setPassword(hashedPassword);
+                }
                 //Persist o user
                 userDao.persist(convertUserDtotoUserEntity(user));
                 return true;
@@ -472,7 +482,6 @@ public class UserBean implements Serializable {
         boolean status = false;
 
         if (user.getUsername().isEmpty() ||
-                user.getPassword().isEmpty() ||
                 user.getEmail().isEmpty() ||
                 user.getFirstName().isEmpty() ||
                 user.getLastName().isEmpty() ||
