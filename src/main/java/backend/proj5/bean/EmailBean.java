@@ -1,6 +1,5 @@
 package backend.proj5.bean;
 
-import backend.proj5.dao.UserDao;
 import backend.proj5.dto.User;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;

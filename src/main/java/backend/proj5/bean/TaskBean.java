@@ -9,12 +9,16 @@ import backend.proj5.entity.TaskEntity;
 import backend.proj5.entity.UserEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 @Stateless
 public class TaskBean implements Serializable {
+
+    private static final Logger logger = LogManager.getLogger(TaskBean.class);
 
     @EJB
     private TaskDao taskDao;
@@ -45,6 +49,13 @@ public class TaskBean implements Serializable {
             created = true;
 
         }
+
+        logger.info("Task created: {} by {} with id: {}", task.getTitle(), task.getOwner().getUsername(), task.getId());
+        logger.debug("Sample debug message");
+        logger.info("Sample info message");
+        logger.warn("Sample warn message");
+        logger.error("Sample error message");
+        logger.fatal("Sample fatal message");
 
         return created;
     }
