@@ -101,6 +101,12 @@ public class UserDao extends AbstractDao<UserEntity> {
 		}
 	}
 
-
+	public boolean doesUserHavePasswordDefined(String email) {
+		try {
+			return (boolean) em.createNamedQuery("User.doesUserHavePasswordDefined").setParameter("email", email).getSingleResult();
+		} catch (Exception e) {
+			return false;
+		}
+	}
 
 }

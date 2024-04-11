@@ -24,7 +24,6 @@ public class UserService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(Login login) {
-
         User userLogged = userBean.login(login);
         Response response;
 
@@ -301,12 +300,28 @@ public class UserService {
 
         Response response;
 
-        boolean confirmed = userBean.updateUserEntityConfirmation(email);
+        int confirmed = userBean.updateUserEntityConfirmation(email);
 
-        if (confirmed) {
-            response = Response.status(200).entity("User confirmed").build();
-        } else {
+        if (confirmed == 0) {
             response = Response.status(404).entity("User not found").build();
+        } else if (confirmed == 1) {
+            response = Response.status(404).entity("User successfully confirmed.").build();
+        } else {
+            response = Response.status(404).entity("User already confirmed.").build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/defined-password")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response doesUserHavePasswordDefined(@HeaderParam("email") String email) {
+        Response response;
+        boolean hasPassword = userBean.doesUserHavePasswordDefined(email);
+        if (hasPassword) {
+            response = Response.status(200).entity(true).build();
+        } else {
+            response = Response.status(404).entity(false).build();
         }
         return response;
     }

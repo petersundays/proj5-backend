@@ -1,6 +1,5 @@
 package backend.proj5.dao;
 
-import backend.proj5.dto.Message;
 import backend.proj5.entity.MessageEntity;
 import jakarta.ejb.Stateless;
 

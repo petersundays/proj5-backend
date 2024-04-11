@@ -405,19 +405,17 @@ public class UserBean implements Serializable {
         return status;
     }
 
-    public boolean updateUserEntityConfirmation(String email) {
-        boolean status = false;
-
+    public int updateUserEntityConfirmation(String email) {
         UserEntity u = userDao.findUserByEmail(email);
 
-        if (u != null && !u.isConfirmed()){
-
+        if (u == null) {
+            return 0; // user not found
+        } else if (u.isConfirmed()) {
+            return 2; // user was already confirmed
+        } else {
             u.setConfirmed(true);
-
-            status = true;
+            return 1; // user successfully confirmed
         }
-
-        return status;
     }
 
     public boolean isAuthenticated(String token) {
@@ -701,4 +699,8 @@ public class UserBean implements Serializable {
         return false;
     }
 
+    public boolean doesUserHavePasswordDefined(String email) {
+        System.out.println("***************" + userDao.doesUserHavePasswordDefined(email));
+        return userDao.doesUserHavePasswordDefined(email);
+    }
 }
