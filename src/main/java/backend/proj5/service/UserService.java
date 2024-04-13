@@ -356,4 +356,19 @@ public class UserService {
         return response;
     }
 
+    @GET
+    @Path("/validate-token")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response isValidationTokenValid(@HeaderParam("validationToken") String validationToken) {
+        Response response;
+        if (validationToken == null) {
+            response = Response.status(422).entity("Invalid credentials").build();
+            return response;
+        }
+
+        boolean isValid = userBean.isValidationTokenValid(validationToken);
+        response = Response.status(200).entity(isValid).build();
+        return response;
+    }
+
 }
