@@ -103,7 +103,6 @@ public class UserDao extends AbstractDao<UserEntity> {
 
 	public boolean doesUserHavePasswordDefined(String validationToken) {
 		try {
-			System.out.println("******************* " + validationToken);
 			return (boolean) em.createNamedQuery("User.doesUserHavePasswordDefined").setParameter("validationToken", validationToken).getSingleResult();
 		} catch (Exception e) {
 			return false;

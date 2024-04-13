@@ -415,7 +415,8 @@ public class UserBean implements Serializable {
 
     public int updateUserEntityConfirmation(String validationToken) {
         UserEntity u = userDao.findUserByValidationToken(validationToken);
-
+        System.out.println("USERBEAN validationToken: " + validationToken);
+        System.out.println("USERBEAN u: " + u.isConfirmed());
         if (u == null) {
             return 0; // user not found
         } else if (u.isConfirmed()) {
@@ -707,7 +708,10 @@ public class UserBean implements Serializable {
 
             //Define a password encriptada
             user.setPassword(hashedPassword);
-            user.setValidationToken(null);
+
+            if (user.isConfirmed()) {
+                user.setValidationToken(null);
+            }
             userDao.merge(user);
             status = true;
         }
@@ -716,7 +720,6 @@ public class UserBean implements Serializable {
     }
 
     public boolean doesUserHavePasswordDefined(String validationToken) {
-        System.out.println("VALIDATION TOKEN BEAN " + validationToken);
         return userDao.doesUserHavePasswordDefined(validationToken);
     }
 
@@ -724,26 +727,29 @@ public class UserBean implements Serializable {
         return userDao.isValidationTokenValid(email, validationToken);
     }
 
-    public boolean sendPasswordResetEmail(String email) {
+    public int sendPasswordResetEmail(String email) {
 
-        boolean sent = false;
+        int sent = 0;
         UserEntity user = userDao.findUserByEmail(email);
 
-        if (user == null) {
-            return false;
+        if (user != null) {
+
+            if (!user.isConfirmed()) {
+                sent = 1;
+            } else {
+
+                String token = generateNewToken();
+                user.setValidationToken(token);
+                userDao.merge(user);
+
+                if (emailBean.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), token)) {
+                    sent = 2;
+                } else {
+                    user.setValidationToken(null);
+                    userDao.merge(user);
+                }
+            }
         }
-
-        String token = generateNewToken();
-        user.setValidationToken(token);
-        userDao.merge(user);
-
-        if (emailBean.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), token)) {
-            sent = true;
-        } else {
-            user.setValidationToken(null);
-            userDao.merge(user);
-        }
-
         return sent;
     }
 }
