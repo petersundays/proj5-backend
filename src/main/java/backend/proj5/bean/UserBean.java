@@ -76,10 +76,14 @@ public class UserBean implements Serializable {
 
     //Permite ao utilizador entrar na app, gera token
     public User login(Login user) {
+
         UserEntity userEntity = userDao.findUserByUsername(user.getUsername());
+
         if (userEntity != null && userEntity.isVisible() && userEntity.isConfirmed()) {
+
             //Verifica se a password coincide com a password encriptada
             if (BCrypt.checkpw(user.getPassword(), userEntity.getPassword())) {
+
                 String token = generateNewToken();
                 userEntity.setToken(token);
                 User userDto = convertUserEntitytoUserDto(userEntity);
@@ -142,9 +146,7 @@ public class UserBean implements Serializable {
                 }
 
                 if (user.getPassword() == null || user.getPassword().isEmpty() || user.getPassword().isBlank()) {
-                    System.out.println("Password is empty");
                     user.setPassword("");
-                    System.out.println(user.getPassword());
 
                 } else {
 
@@ -154,13 +156,19 @@ public class UserBean implements Serializable {
                     //Define a password encriptada
                     user.setPassword(hashedPassword);
                 }
-                //Persist o user
-                userDao.persist(convertUserDtotoUserEntity(user));
-                return true;
+
+                UserEntity userEntity = convertUserDtotoUserEntity(user);
+                userEntity.setValidationToken(generateNewToken());
+
+                if (emailBean.sendConfirmationEmail(user, userEntity.getValidationToken())) {
+                    userDao.persist(userEntity);
+                    return true;
+                }
             }
         } else {
             return false;
         }
+        return false;
     }
 
 
@@ -405,8 +413,8 @@ public class UserBean implements Serializable {
         return status;
     }
 
-    public int updateUserEntityConfirmation(String email) {
-        UserEntity u = userDao.findUserByEmail(email);
+    public int updateUserEntityConfirmation(String validationToken) {
+        UserEntity u = userDao.findUserByValidationToken(validationToken);
 
         if (u == null) {
             return 0; // user not found
@@ -414,6 +422,7 @@ public class UserBean implements Serializable {
             return 2; // user was already confirmed
         } else {
             u.setConfirmed(true);
+            u.setValidationToken(null);
             return 1; // user successfully confirmed
         }
     }
@@ -441,7 +450,7 @@ public class UserBean implements Serializable {
         return status;
     }
 
-    private boolean isEmailFormatValid(String email) {
+    public boolean isEmailFormatValid(String email) {
         // Use a regular expression to perform email format validation
         // This regex is a basic example and may need to be adjusted
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
@@ -686,21 +695,55 @@ public class UserBean implements Serializable {
         return false;
     }
 
-    public boolean setInitialPassword (String email, String password) {
-        UserEntity user = userDao.findUserByEmail(email);
-        if (user != null && !user.getPassword().trim().isEmpty()) {
+    //Método para reset de password e para definição da primeira password quando user é registado pelo PO
+    public boolean setPassword(String validationToken, String password) {
+
+        boolean status = false;
+        UserEntity user = userDao.findUserByValidationToken(validationToken);
+
+        if (user != null && !password.trim().isEmpty()) {
             //Encripta a password usando BCrypt
             String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
             //Define a password encriptada
             user.setPassword(hashedPassword);
-            return true;
+            user.setValidationToken(null);
+            userDao.merge(user);
+            status = true;
         }
-        return false;
+
+        return status;
     }
 
-    public boolean doesUserHavePasswordDefined(String email) {
-        System.out.println("***************" + userDao.doesUserHavePasswordDefined(email));
-        return userDao.doesUserHavePasswordDefined(email);
+    public boolean doesUserHavePasswordDefined(String validationToken) {
+        System.out.println("VALIDATION TOKEN BEAN " + validationToken);
+        return userDao.doesUserHavePasswordDefined(validationToken);
+    }
+
+    public boolean isValidationTokenValid(String email, String validationToken) {
+        return userDao.isValidationTokenValid(email, validationToken);
+    }
+
+    public boolean sendPasswordResetEmail(String email) {
+
+        boolean sent = false;
+        UserEntity user = userDao.findUserByEmail(email);
+
+        if (user == null) {
+            return false;
+        }
+
+        String token = generateNewToken();
+        user.setValidationToken(token);
+        userDao.merge(user);
+
+        if (emailBean.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), token)) {
+            sent = true;
+        } else {
+            user.setValidationToken(null);
+            userDao.merge(user);
+        }
+
+        return sent;
     }
 }

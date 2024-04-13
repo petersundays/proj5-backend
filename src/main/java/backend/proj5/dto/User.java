@@ -24,6 +24,8 @@ public class User {
     @XmlElement
     private String token;
     @XmlElement
+    private String validationToken;
+    @XmlElement
     int typeOfUser;
     @XmlElement
     int numberOfTasks;
@@ -120,6 +122,14 @@ public class User {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getValidationToken() {
+        return validationToken;
+    }
+
+    public void setValidationToken(String validationToken) {
+        this.validationToken = validationToken;
     }
 
     public int getNumberOfTasks() {
