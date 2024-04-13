@@ -320,13 +320,13 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response doesUserHavePasswordDefined(@HeaderParam("validationToken") String validationToken) {
         Response response;
+
         if (validationToken == null) {
             response = Response.status(422).entity("Invalid credentials").build();
             return response;
         }
 
         boolean hasPassword = userBean.doesUserHavePasswordDefined(validationToken);
-        System.out.println("HAS PASS " + hasPassword);
         response = Response.status(200).entity(hasPassword).build();
         return response;
     }
@@ -343,12 +343,14 @@ public class UserService {
             return response;
         }
 
-        boolean reset = userBean.sendPasswordResetEmail(email);
+        int reset = userBean.sendPasswordResetEmail(email);
 
-        if (reset) {
-            response = Response.status(200).entity("Password recovery email sent, please check your email.").build();
+        if (reset == 0) {
+            response = Response.status(404).entity("Account not found").build();
+        } else if (reset == 1) {
+            response = Response.status(400).entity("Please confirm your account first").build();
         } else {
-            response = Response.status(500).entity("Email not sent").build();
+            response = Response.status(200).entity("Email sent").build();
         }
 
         return response;
