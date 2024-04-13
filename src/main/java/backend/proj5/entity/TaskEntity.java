@@ -22,6 +22,8 @@ import java.time.LocalDate;
 @NamedQuery(name="Task.eraseAllNotErasedTasks", query="UPDATE TaskEntity a SET a.erased = true WHERE a.erased = false")
 @NamedQuery(name="Task.numberOfTasksFromUser", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.owner = :owner")
 @NamedQuery(name="Task.numberOfTasksFromUserByState", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = :stateId")
+@NamedQuery(name="Task.countNumberOfNotErasedTasks", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.erased = false")
+@NamedQuery(name="Task.countNumberOfTasksByState", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.stateId = :stateId")
 
 public class TaskEntity implements Serializable{
 

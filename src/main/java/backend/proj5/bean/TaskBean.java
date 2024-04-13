@@ -328,9 +328,25 @@ public class TaskBean implements Serializable {
         return taskDao.numberOfTasksFromUser(userEntity);
     }
 
-    public int numberOfTasksByState(String username, int stateId) {
+    public int numberOfTasksFromUserByState(String username, int stateId) {
         UserEntity userEntity = userDao.findUserByUsername(username);
         return taskDao.numberOfTasksFromUserByState(userEntity, stateId);
     }
 
+    public double averageNumberOfTasksPerUser(int totalVisibleUsers) {
+        double average = 0;
+
+        int totalNotErasedTasks = taskDao.countNumberOfNotErasedTasks();
+
+        if (totalVisibleUsers != 0) {
+            average = (double) totalNotErasedTasks / totalVisibleUsers;
+            average = Math.round(average * 100.0) / 100.0; // Round to two decimal places
+        }
+
+        return average;
+
+    }
+    public int numberOfTasksByState(int stateId) {
+        return taskDao.countNumberOfTasksByState(stateId);
+    }
 }

@@ -152,4 +152,23 @@ public class CategoryService {
         return response;
     }
 
+    @GET
+    @Path("/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listCategoriesByNumberOfTasks(@HeaderParam("token") String token) {
+
+        Response response;
+
+        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
+            try {
+                ArrayList<String> categories = categoryBean.listCategoriesByNumberOfTasks();
+                response = Response.status(200).entity(categories).build();
+            } catch (Exception e) {
+                response = Response.status(404).entity("Something went wrong. The categories were not found.").build();
+            }
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
 }

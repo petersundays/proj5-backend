@@ -371,4 +371,25 @@ public class UserService {
         return response;
     }
 
+    @GET
+    @Path("/user-stats")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserStats(@HeaderParam("token") String token) {
+        Response response;
+        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
+            try {
+                Number[] userStats = userBean.userStats();
+                response = Response.status(200).entity(userStats).build();
+
+            } catch (Exception e) {
+                response = Response.status(500).entity("Error getting user stats").build();
+            }
+
+        } else {
+            response = Response.status(401).entity("You don't have permission").build();
+        }
+
+        return response;
+    }
+
 }

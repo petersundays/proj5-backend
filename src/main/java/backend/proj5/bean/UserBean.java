@@ -3,6 +3,7 @@ package backend.proj5.bean;
 import backend.proj5.dao.TaskDao;
 import backend.proj5.dao.UserDao;
 import backend.proj5.dto.Login;
+import backend.proj5.dto.Task;
 import backend.proj5.dto.User;
 import backend.proj5.entity.TaskEntity;
 import backend.proj5.entity.UserEntity;
@@ -800,5 +801,43 @@ public class UserBean implements Serializable {
             }
         }
         return sent;
+    }
+
+    public int countAllUsers() {
+        return userDao.countAllUsers();
+    }
+
+    public int countAllUsersByConfirmed(boolean confirmed) {
+        return userDao.countAllUsersByConfirmed(confirmed);
+    }
+
+    public int countAllUsersByVisibility(boolean visible) {
+        return userDao.countAllUsersByVisibility(visible);
+    }
+
+    public Number [] userStats() {
+        Number [] stats = new Number[9];
+
+        int totalUsers = countAllUsers();
+        int totalVisibleUsers = countAllUsersByVisibility(true);
+        int totalNotVisibleUsers = countAllUsersByVisibility(false);
+        int totalConfirmedUsers = countAllUsersByConfirmed(true);
+        int totalNotConfirmedUsers = countAllUsersByConfirmed(false);
+        double averageNumberOfTasksPerUser = taskBean.averageNumberOfTasksPerUser(totalVisibleUsers);
+        int numberOfToDoTasks = taskBean.numberOfTasksByState(Task.TODO);
+        int numberOfDoingTasks = taskBean.numberOfTasksByState(Task.DOING);
+        int numberOfDoneTasks = taskBean.numberOfTasksByState(Task.DONE);
+
+        stats[0] = totalUsers;
+        stats[1] = totalVisibleUsers;
+        stats[2] = totalNotVisibleUsers;
+        stats[3] = totalConfirmedUsers;
+        stats[4] = totalNotConfirmedUsers;
+        stats[5] = averageNumberOfTasksPerUser;
+        stats[6] = numberOfToDoTasks;
+        stats[7] = numberOfDoingTasks;
+        stats[8] = numberOfDoneTasks;
+
+        return stats;
     }
 }

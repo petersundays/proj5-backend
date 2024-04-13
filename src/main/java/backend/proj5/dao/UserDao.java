@@ -5,6 +5,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Stateless
 public class UserDao extends AbstractDao<UserEntity> {
@@ -109,21 +110,36 @@ public class UserDao extends AbstractDao<UserEntity> {
 		}
 	}
 
-	public boolean isValidationTokenValid(String email, String validationToken) {
-		try {
-			return (boolean) em.createNamedQuery("User.isValidationTokenValid").setParameter("email", email)
-					.setParameter("validationToken", validationToken).getSingleResult();
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
 	public UserEntity findUserByValidationToken(String validationToken) {
 		try {
 			return (UserEntity) em.createNamedQuery("User.findUserByValidationToken").setParameter("validationToken", validationToken)
 					.getSingleResult();
 		} catch (NoResultException e) {
 			return null;
+		}
+	}
+
+	public int countAllUsers() {
+		try {
+			return ((Long) em.createNamedQuery("User.countAllUsers").getSingleResult()).intValue();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public int countAllUsersByConfirmed(boolean confirmed) {
+		try {
+			return ((Long) em.createNamedQuery("User.countAllUsersByConfirmed").setParameter("confirmed", confirmed).getSingleResult()).intValue();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public int countAllUsersByVisibility(boolean visible) {
+		try {
+			return ((Long) em.createNamedQuery("User.countAllUsersByVisibility").setParameter("visible", visible).getSingleResult()).intValue();
+		} catch (Exception e) {
+			return 0;
 		}
 	}
 

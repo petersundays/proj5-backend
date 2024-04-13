@@ -405,7 +405,7 @@ public Response getAllTasks(@HeaderParam("token") String token) {
     public Response getAtributedTasksByState(@HeaderParam("token") String token, @PathParam("username") String username, @PathParam("stateId") int stateId) {
         Response response;
         if (userBean.isAuthenticated(token)) {
-            int atributedTasks = taskBean.numberOfTasksByState(username, stateId);
+            int atributedTasks = taskBean.numberOfTasksFromUserByState(username, stateId);
             response = Response.status(200).entity(atributedTasks).build();
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
