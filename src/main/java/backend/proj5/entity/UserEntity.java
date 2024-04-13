@@ -17,7 +17,10 @@ import java.util.Set;
 @NamedQuery(name = "User.findUserByPhone", query = "SELECT  u FROM UserEntity u WHERE u.phone = :phone")
 @NamedQuery(name = "User.findUserByToken", query = "SELECT DISTINCT u FROM UserEntity u WHERE u.token = :token")
 @NamedQuery(name = "User.findUserByUsernameAndPassword", query = "SELECT u FROM UserEntity u WHERE u.username = :username AND u.password = :password")
-@NamedQuery(name = "User.doesUserHavePasswordDefined", query = "SELECT CASE WHEN (u.password IS NULL OR TRIM(u.password) = '') THEN false ELSE true END FROM UserEntity u WHERE u.email = :email")
+@NamedQuery(name = "User.doesUserHavePasswordDefined", query = "SELECT CASE WHEN (u.password IS NULL OR TRIM(u.password) = '') THEN false ELSE true END FROM UserEntity u WHERE u.validationToken = :validationToken")
+@NamedQuery(name = "User.isValidationTokenValid", query = "SELECT CASE WHEN (u.validationToken = :validationToken) THEN true ELSE false END FROM UserEntity u WHERE u.email = :email")
+@NamedQuery(name = "User.findUserByValidationToken", query = "SELECT u FROM UserEntity u WHERE u.validationToken = :validationToken")
+
 public class UserEntity implements Serializable{
 
     private static final long serialVersionUID = 1L;
@@ -50,6 +53,9 @@ public class UserEntity implements Serializable{
 
     @Column(name="token", nullable=true, unique = true, updatable = true)
     private String token;
+
+    @Column(name="validationToken", nullable=true, unique = true, updatable = true)
+    private String validationToken;
 
     @Column(name="visible", nullable = false, unique = false, updatable = true)
     private boolean visible;
@@ -164,6 +170,14 @@ public class UserEntity implements Serializable{
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getValidationToken() {
+        return validationToken;
+    }
+
+    public void setValidationToken(String validationToken) {
+        this.validationToken = validationToken;
     }
 
     public boolean isVisible() {return visible;}

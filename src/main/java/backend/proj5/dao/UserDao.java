@@ -101,11 +101,30 @@ public class UserDao extends AbstractDao<UserEntity> {
 		}
 	}
 
-	public boolean doesUserHavePasswordDefined(String email) {
+	public boolean doesUserHavePasswordDefined(String validationToken) {
 		try {
-			return (boolean) em.createNamedQuery("User.doesUserHavePasswordDefined").setParameter("email", email).getSingleResult();
+			System.out.println("******************* " + validationToken);
+			return (boolean) em.createNamedQuery("User.doesUserHavePasswordDefined").setParameter("validationToken", validationToken).getSingleResult();
 		} catch (Exception e) {
 			return false;
+		}
+	}
+
+	public boolean isValidationTokenValid(String email, String validationToken) {
+		try {
+			return (boolean) em.createNamedQuery("User.isValidationTokenValid").setParameter("email", email)
+					.setParameter("validationToken", validationToken).getSingleResult();
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public UserEntity findUserByValidationToken(String validationToken) {
+		try {
+			return (UserEntity) em.createNamedQuery("User.findUserByValidationToken").setParameter("validationToken", validationToken)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
 		}
 	}
 

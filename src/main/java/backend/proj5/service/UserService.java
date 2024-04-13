@@ -67,11 +67,7 @@ public class UserService {
         } else if (!isPhoneNumberValid) {
             response = Response.status(422).entity("Invalid phone number").build();
         } else if (userBean.register(user)) {
-            if (emailBean.sendConfirmationEmail(user)) {
-                response = Response.status(Response.Status.CREATED).entity("User registered successfully").build(); //status code 201
-            } else {
-                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Email not sent").build(); //status code 500
-            }
+            response = Response.status(Response.Status.CREATED).entity("User registered").build(); //status code 201
         } else {
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("User not registered").build(); //status code 500
         }
@@ -156,14 +152,16 @@ public class UserService {
     @PUT
     @Path("/set/password")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response setInitialPassword(@HeaderParam("email") String email,
-                                       @HeaderParam("password") String password) {
-        boolean passwordSet = userBean.setInitialPassword(email, password);
+    public Response setPassword(@HeaderParam("validationToken") String token, @HeaderParam("password") String password) {
+        Response response;
+
+        boolean passwordSet = userBean.setPassword(token, password);
             if (!passwordSet) {
-                return Response.status(400).entity("User with this email is not found").build();
+                response = Response.status(400).entity(false).build();
             } else {
-                return Response.status(200).entity("Password updated").build();
+                response = Response.status(200).entity(true).build();
             }
+            return response;
     }
 
 
@@ -294,20 +292,25 @@ public class UserService {
     @PUT
     @Path("/email/confirm")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response confirmUser(@HeaderParam("email") String email) {
+    public Response confirmUser(@HeaderParam("validationToken") String validationToken) {
 
 /* O PATH ESTÁ DESTA FORMA EM VEZ DE 'confirm-registration', PQ NO FRONTEND DAVA SEMPRE ERRO APESAR DE FUNCIONAR NO POSTMAN */
 
         Response response;
 
-        int confirmed = userBean.updateUserEntityConfirmation(email);
+        if (validationToken == null) {
+            response = Response.status(422).entity("Invalid credentials").build();
+            return response;
+        }
+
+        int confirmed = userBean.updateUserEntityConfirmation(validationToken);
 
         if (confirmed == 0) {
-            response = Response.status(404).entity("User not found").build();
+            response = Response.status(404).entity("Account not found").build();
         } else if (confirmed == 1) {
-            response = Response.status(404).entity("User successfully confirmed.").build();
+            response = Response.status(200).entity("Account successfully confirmed.").build();
         } else {
-            response = Response.status(404).entity("User already confirmed.").build();
+            response = Response.status(400).entity("Account already confirmed.").build();
         }
         return response;
     }
@@ -315,14 +318,40 @@ public class UserService {
     @GET
     @Path("/defined-password")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response doesUserHavePasswordDefined(@HeaderParam("email") String email) {
+    public Response doesUserHavePasswordDefined(@HeaderParam("validationToken") String validationToken) {
         Response response;
-        boolean hasPassword = userBean.doesUserHavePasswordDefined(email);
-        if (hasPassword) {
-            response = Response.status(200).entity(true).build();
-        } else {
-            response = Response.status(404).entity(false).build();
+        if (validationToken == null) {
+            response = Response.status(422).entity("Invalid credentials").build();
+            return response;
         }
+
+        boolean hasPassword = userBean.doesUserHavePasswordDefined(validationToken);
+        System.out.println("HAS PASS " + hasPassword);
+        response = Response.status(200).entity(hasPassword).build();
         return response;
     }
+
+    @POST
+    @Path("/recover-password")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response recoverPassword(@HeaderParam("email") String email) {
+        Response response;
+
+        if (email == null || !userBean.isEmailFormatValid(email)) {
+            response = Response.status(422).entity("Invalid email").build();
+            return response;
+        }
+
+        boolean reset = userBean.sendPasswordResetEmail(email);
+
+        if (reset) {
+            response = Response.status(200).entity("Password recovery email sent, please check your email.").build();
+        } else {
+            response = Response.status(500).entity("Email not sent").build();
+        }
+
+        return response;
+    }
+
 }

@@ -18,7 +18,7 @@ public class EmailBean {
 
     private final String username = "pedro_domingos10@hotmail.com";
     private final String password = System.getenv("SMTP_PASSWORD");
-    private final String host = "smtp-mail.outlook.com";
+    private final String host = "smtp.office365.com"; //"smtp-mail.outlook.com" estava assim definido primeiro e começou a dar erro
     private final int port = 587;
 
     public EmailBean() {}
@@ -40,6 +40,7 @@ public class EmailBean {
         });
 
         try {
+
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(username));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
@@ -56,13 +57,13 @@ public class EmailBean {
         return sent;
     }
 
-    public boolean sendConfirmationEmail(User user) {
+    public boolean sendConfirmationEmail(User user, String validationToken) {
 
         boolean sent = false;
 
         String userEmail = user.getEmail();
         String subject = "Agile Scrum - Account Confirmation";
-        String confirmationLink = "http://localhost:5173/confirm/" + userEmail;
+        String confirmationLink = "http://localhost:5173/confirm/" + validationToken;
         String body = "Dear " + user.getFirstName() + ",\n\n"
                 + "Thank you for registering with us. Please click on the link below to confirm your account.\n\n"
                 + "Confirmation Link: " + confirmationLink;
@@ -72,6 +73,22 @@ public class EmailBean {
         } else {
             userBean.delete(user.getUsername());
         }
+        return sent;
+    }
+
+    public boolean sendPasswordResetEmail(String email, String firstName, String validationToken) {
+        boolean sent = false;
+
+        String subject = "Agile Scrum - Password Reset";
+        String resetLink = "http://localhost:5173/reset-password/" + validationToken;
+        String body = "Dear " + firstName + ",\n\n"
+                + "Please click on the link below to reset your password.\n\n"
+                + "Reset Link: " + resetLink;
+
+        if (sendEmail(email, subject, body)) {
+            sent = true;
+        }
+
         return sent;
     }
 }
