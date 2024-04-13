@@ -5,6 +5,7 @@ import backend.proj5.entity.TaskEntity;
 import jakarta.ejb.Stateless;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Stateless
 public class CategoryDao extends AbstractDao<CategoryEntity> {
@@ -74,5 +75,19 @@ public class CategoryDao extends AbstractDao<CategoryEntity> {
             }
         }
         return edited;
+    }
+
+    public ArrayList<CategoryEntity> listCategoriesByNumberOfTasks() {
+        try {
+            List<Object[]> results = em.createNamedQuery("Category.listCategoriesByNumberOfTasks").getResultList();
+            ArrayList<CategoryEntity> categories = new ArrayList<>();
+            for (Object[] result : results) {
+                CategoryEntity category = (CategoryEntity) result[0]; // assuming the CategoryEntity is the first column in the result
+                categories.add(category);
+            }
+            return categories;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

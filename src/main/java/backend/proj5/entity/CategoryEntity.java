@@ -12,6 +12,7 @@ import java.util.Set;
 @NamedQuery(name="Category.findCategoryByName", query="SELECT a FROM CategoryEntity a WHERE a.name = :name")
 @NamedQuery(name="Category.findCategoryById", query="SELECT a FROM CategoryEntity a WHERE a.id = :id")
 @NamedQuery(name="Category.deleteCategory", query="DELETE FROM CategoryEntity a WHERE a.name = :name")
+@NamedQuery(name="Category.listCategoriesByNumberOfTasks", query="SELECT c, COUNT(t) as taskCount FROM CategoryEntity c JOIN c.taskList t GROUP BY c ORDER BY taskCount DESC")
 public class CategoryEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 

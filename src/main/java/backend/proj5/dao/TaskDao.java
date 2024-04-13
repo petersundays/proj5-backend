@@ -165,4 +165,24 @@ public boolean eraseAllNotErasedTasks() {
 		}
 	}
 
+	public int countNumberOfNotErasedTasks() {
+		try {
+			Number result = (Number) em.createNamedQuery("Task.countNumberOfNotErasedTasks").getSingleResult();
+			return result.intValue();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public int countNumberOfTasksByState(int stateId) {
+		try {
+			Number result = (Number) em.createNamedQuery("Task.countNumberOfTasksByState")
+					.setParameter("stateId", stateId)
+					.getSingleResult();
+			return result.intValue();
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
 }
