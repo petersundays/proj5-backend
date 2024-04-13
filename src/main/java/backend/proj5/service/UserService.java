@@ -216,7 +216,7 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUsers(@HeaderParam("token") String token) {
         Response response;
-        if (userBean.isAuthenticated(token) && !userBean.userIsDeveloper(token)) {
+        if (userBean.isAuthenticated(token)) {
             List<User> allUsers = userBean.getUsers();
             response = Response.status(200).entity(allUsers).build();
         } else {

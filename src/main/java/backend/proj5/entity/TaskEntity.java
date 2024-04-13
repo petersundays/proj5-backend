@@ -24,6 +24,7 @@ import java.time.LocalDate;
 @NamedQuery(name="Task.numberOfTasksFromUserByState", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.owner = :owner AND a.stateId = :stateId")
 @NamedQuery(name="Task.countNumberOfNotErasedTasks", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.erased = false")
 @NamedQuery(name="Task.countNumberOfTasksByState", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.stateId = :stateId")
+@NamedQuery(name="Task.findTasksByStateId", query="SELECT a FROM TaskEntity a WHERE a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 
 public class TaskEntity implements Serializable{
 
@@ -55,6 +56,8 @@ public class TaskEntity implements Serializable{
 
     @Column (name="limitDate", nullable = false, unique = false, updatable = true)
     private LocalDate limitDate;
+    @Column (name="conclusionDate", nullable = true, unique = false, updatable = true)
+    private LocalDate conclusionDate;
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
@@ -151,6 +154,14 @@ public class TaskEntity implements Serializable{
 
     public void setLimitDate(LocalDate limitDate) {
         this.limitDate = limitDate;
+    }
+
+    public LocalDate getConclusionDate() {
+        return conclusionDate;
+    }
+
+    public void setConclusionDate(LocalDate conclusionDate) {
+        this.conclusionDate = conclusionDate;
     }
 
     public CategoryEntity getCategory() {

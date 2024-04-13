@@ -13,6 +13,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 @Stateless
@@ -113,7 +115,13 @@ public class TaskBean implements Serializable {
         task.setCategory(categoryBean.convertCategoryEntityToCategoryDto(categoryDao.findCategoryByName(task.getCategory().getName())));
         if (taskDao.findTaskById(task.getId()) != null) {
             if (validateTask(task)) {
-                taskDao.merge(convertTaskToEntity(task));
+                TaskEntity updatedTask = convertTaskToEntity(task);
+                if (updatedTask.getStateId() == Task.DONE) {
+                    updatedTask.setConclusionDate(LocalDate.now());
+                } else {
+                    updatedTask.setConclusionDate(null);
+                }
+                taskDao.merge(updatedTask);
                 edited = true;
             }
         }
@@ -129,6 +137,11 @@ public class TaskBean implements Serializable {
             TaskEntity taskEntity = taskDao.findTaskById(taskId);
             if (taskEntity != null) {
                 taskEntity.setStateId(stateId);
+                if (stateId == Task.DONE) {
+                    taskEntity.setConclusionDate(LocalDate.now());
+                } else {
+                    taskEntity.setConclusionDate(null);
+                }
                 taskDao.merge(taskEntity);
                 updated = true;
             }
@@ -348,5 +361,27 @@ public class TaskBean implements Serializable {
     }
     public int numberOfTasksByState(int stateId) {
         return taskDao.countNumberOfTasksByState(stateId);
+    }
+
+    public double averageTimeToFinishTask() {
+        double average = 0;
+        ArrayList<TaskEntity> tasksDone = taskDao.findTasksByStateId(Task.DONE);
+        int totalTasksDone = tasksDone.size();
+        int totalDays = 0;
+
+        for (TaskEntity task : tasksDone) {
+            if (task.getConclusionDate().isBefore(task.getStartDate())) {
+                totalDays += (int) task.getCreationDate().toLocalDateTime().toLocalDate().until(task.getConclusionDate(), ChronoUnit.DAYS);
+            } else {
+                totalDays += task.getStartDate().until(task.getConclusionDate()).getDays();
+            }
+        }
+
+        if (totalTasksDone != 0) {
+            average = (double) totalDays / totalTasksDone;
+            average = Math.round(average * 100.0) / 100.0; // Round to two decimal places
+        }
+
+        return average;
     }
 }

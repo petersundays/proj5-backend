@@ -185,4 +185,12 @@ public boolean eraseAllNotErasedTasks() {
 		}
 	}
 
+	public ArrayList<TaskEntity> findTasksByStateId(int stateId) {
+		try {
+			return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findTasksByStateId").setParameter("stateId", stateId).getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 }
