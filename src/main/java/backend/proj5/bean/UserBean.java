@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 
@@ -158,7 +160,7 @@ public class UserBean implements Serializable {
                 }
 
                 UserEntity userEntity = convertUserDtotoUserEntity(user);
-                userEntity.setValidationToken(generateNewToken());
+                userEntity.setValidationToken(generateValidationToken(48*60));
 
                 if (emailBean.sendConfirmationEmail(user, userEntity.getValidationToken())) {
                     userDao.persist(userEntity);
@@ -243,6 +245,43 @@ public class UserBean implements Serializable {
         byte[] randomBytes = new byte[24];
         secureRandom.nextBytes(randomBytes);
         return base64Encoder.encodeToString(randomBytes);
+    }
+
+    private String generateValidationToken(int expirationMinutes) {
+        SecureRandom secureRandom = new SecureRandom(); //threadsafe
+        Base64.Encoder base64Encoder = Base64.getUrlEncoder(); //threadsafe
+        byte[] randomBytes = new byte[24];
+        secureRandom.nextBytes(randomBytes);
+        String token = base64Encoder.encodeToString(randomBytes);
+
+        Instant expirationTime = Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES);
+        token += "|" + expirationTime.toEpochMilli();
+
+        return token;
+    }
+
+    // Validate token and check if it's expired
+    public static boolean isValidationTokenValid(String token) {
+        if (token == null || token.isEmpty()) {
+            return false;
+        }
+
+        // Split token and expiry timestamp
+        String[] parts = token.split("\\|");
+        if (parts.length != 2) {
+            return false;
+        }
+
+        try {
+            // Parse expiry timestamp
+            long expiryTimestamp = Long.parseLong(parts[1]);
+            Instant expiryTime = Instant.ofEpochMilli(expiryTimestamp);
+
+            // Check if current time is before expiry time
+            return Instant.now().isBefore(expiryTime);
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
 
@@ -414,9 +453,15 @@ public class UserBean implements Serializable {
     }
 
     public int updateUserEntityConfirmation(String validationToken) {
+        boolean isValidationTokenValid = isValidationTokenValid(validationToken);
+
         UserEntity u = userDao.findUserByValidationToken(validationToken);
-        System.out.println("USERBEAN validationToken: " + validationToken);
-        System.out.println("USERBEAN u: " + u.isConfirmed());
+
+        if (!isValidationTokenValid) {
+            userDao.remove(u);
+            return 0; // token expired
+        }
+
         if (u == null) {
             return 0; // user not found
         } else if (u.isConfirmed()) {
@@ -700,7 +745,15 @@ public class UserBean implements Serializable {
     public boolean setPassword(String validationToken, String password) {
 
         boolean status = false;
+        boolean isValidationTokenValid = isValidationTokenValid(validationToken);
+
         UserEntity user = userDao.findUserByValidationToken(validationToken);
+
+        if (!isValidationTokenValid) {
+            user.setValidationToken(null);
+            userDao.merge(user);
+            return status;
+        }
 
         if (user != null && !password.trim().isEmpty()) {
             //Encripta a password usando BCrypt
@@ -723,10 +776,6 @@ public class UserBean implements Serializable {
         return userDao.doesUserHavePasswordDefined(validationToken);
     }
 
-    public boolean isValidationTokenValid(String email, String validationToken) {
-        return userDao.isValidationTokenValid(email, validationToken);
-    }
-
     public int sendPasswordResetEmail(String email) {
 
         int sent = 0;
@@ -738,7 +787,7 @@ public class UserBean implements Serializable {
                 sent = 1;
             } else {
 
-                String token = generateNewToken();
+                String token = generateValidationToken(5);
                 user.setValidationToken(token);
                 userDao.merge(user);
 
