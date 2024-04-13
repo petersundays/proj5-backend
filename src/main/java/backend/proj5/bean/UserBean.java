@@ -303,9 +303,10 @@ public class UserBean implements Serializable {
         if (userEntities != null) {
             ArrayList<User> users = new ArrayList<>();
             for (UserEntity userE : userEntities) {
-
-                if (userE.getTypeOfUser()!=400 && !userE.getUsername().equalsIgnoreCase("admin")){
-                    users.add(convertUserEntitytoUserDto(userE));
+                if (userE.isConfirmed()) {
+                    if (userE.getTypeOfUser() != 400 && !userE.getUsername().equalsIgnoreCase("admin")) {
+                        users.add(convertUserEntitytoUserDto(userE));
+                    }
                 }
             }
             return users;

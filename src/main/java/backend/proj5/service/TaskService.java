@@ -413,4 +413,23 @@ public Response getAllTasks(@HeaderParam("token") String token) {
         return response;
     }
 
+    @GET
+    @Path("/average")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response averageTimeToFinishTask(@HeaderParam("token") String token) {
+        Response response;
+
+        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
+            try {
+                double average = taskBean.averageTimeToFinishTask();
+                response = Response.status(200).entity(average).build();
+            } catch (Exception e) {
+                response = Response.status(404).entity("Something went wrong. The average time was not calculated.").build();
+            }
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
+
 }
