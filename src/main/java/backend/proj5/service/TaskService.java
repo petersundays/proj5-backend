@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Path("/tasks")
 public class TaskService {
@@ -425,6 +426,25 @@ public Response getAllTasks(@HeaderParam("token") String token) {
                 response = Response.status(200).entity(average).build();
             } catch (Exception e) {
                 response = Response.status(404).entity("Something went wrong. The average time was not calculated.").build();
+            }
+        } else {
+            response = Response.status(401).entity("Invalid credentials").build();
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/done-by-date")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response totalTasksDoneByEachDay(@HeaderParam("token") String token) {
+        Response response;
+
+        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
+            try {
+                List<Object[]> totalTasksDoneByEachDay = taskBean.totalTasksDoneByEachDay();
+                response = Response.status(200).entity(totalTasksDoneByEachDay).build();
+            } catch (Exception e) {
+                response = Response.status(404).entity("Something went wrong. The total tasks done by each day was not calculated.").build();
             }
         } else {
             response = Response.status(401).entity("Invalid credentials").build();

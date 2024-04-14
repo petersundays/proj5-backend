@@ -143,4 +143,12 @@ public class UserDao extends AbstractDao<UserEntity> {
 		}
 	}
 
+	public List<Object[]> totalUsersRegisteredByEachDay() {
+		try {
+			return em.createNamedQuery("User.totalUsersRegisteredByEachDay").getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 }

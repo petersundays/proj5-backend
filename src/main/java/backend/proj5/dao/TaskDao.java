@@ -6,6 +6,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Stateless
 public class TaskDao extends AbstractDao<TaskEntity> {
@@ -188,6 +189,14 @@ public boolean eraseAllNotErasedTasks() {
 	public ArrayList<TaskEntity> findTasksByStateId(int stateId) {
 		try {
 			return (ArrayList<TaskEntity>) em.createNamedQuery("Task.findTasksByStateId").setParameter("stateId", stateId).getResultList();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public List<Object[]> totalTasksDoneByEachDay() {
+		try {
+			return em.createNamedQuery("Task.totalTasksDoneByEachDay").getResultList();
 		} catch (Exception e) {
 			return null;
 		}
