@@ -3,6 +3,7 @@ package backend.proj5.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -19,7 +20,7 @@ import java.util.Set;
 @NamedQuery(name = "User.findUserByUsernameAndPassword", query = "SELECT u FROM UserEntity u WHERE u.username = :username AND u.password = :password")
 @NamedQuery(name = "User.doesUserHavePasswordDefined", query = "SELECT CASE WHEN (u.password IS NULL OR TRIM(u.password) = '') THEN false ELSE true END FROM UserEntity u WHERE u.validationToken = :validationToken")
 @NamedQuery(name = "User.findUserByValidationToken", query = "SELECT u FROM UserEntity u WHERE u.validationToken = :validationToken")
-@NamedQuery(name = "User.countAllUsers", query = "SELECT COUNT(u) FROM UserEntity u")
+@NamedQuery(name = "User.countAllUsers", query = "SELECT COUNT(u) FROM UserEntity u WHERE LOWER(u.username) <> 'notassigned'")
 @NamedQuery(name = "User.countAllUsersByVisibility", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.visible = :visible")
 @NamedQuery(name = "User.countAllUsersByConfirmed", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.confirmed = :confirmed")
 
@@ -52,6 +53,9 @@ public class UserEntity implements Serializable{
 
     @Column(name="photo_url", nullable=false, unique = false, updatable = true)
     private String photoURL;
+
+    @Column(name="registrationDate", nullable = false, updatable = false)
+    private LocalDate registrationDate;
 
     @Column(name="token", nullable=true, unique = true, updatable = true)
     private String token;
@@ -164,6 +168,15 @@ public class UserEntity implements Serializable{
 
     public void setPhotoURL(String photoURL) {
         this.photoURL = photoURL;
+    }
+
+    public LocalDate getRegistrationDate() {
+        return registrationDate;
+    }
+
+    @PrePersist
+    public void setRegistrationDate() {
+        this.registrationDate = LocalDate.now();
     }
 
     public String getToken() {
