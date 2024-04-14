@@ -262,7 +262,7 @@ public class UserBean implements Serializable {
     }
 
     // Validate token and check if it's expired
-    public static boolean isValidationTokenValid(String token) {
+    public boolean isValidationTokenValid(String token) {
         if (token == null || token.isEmpty()) {
             return false;
         }
@@ -841,4 +841,6 @@ public class UserBean implements Serializable {
 
         return stats;
     }
+
+
 }
