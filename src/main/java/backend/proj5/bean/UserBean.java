@@ -18,9 +18,12 @@ import java.io.Serializable;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
 
 @Stateless
 public class UserBean implements Serializable {
@@ -842,5 +845,7 @@ public class UserBean implements Serializable {
         return stats;
     }
 
-
+    public List<Object[]> getTotalUsersRegisteredByEachDay() {
+        return userDao.totalUsersRegisteredByEachDay();
+    }
 }

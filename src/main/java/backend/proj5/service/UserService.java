@@ -392,4 +392,25 @@ public class UserService {
         return response;
     }
 
+    @GET
+    @Path("/total-by-date")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTotalUsersRegisteredByEachDay(@HeaderParam("token") String token) {
+        Response response;
+        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
+            try {
+                List<Object[]> users = userBean.getTotalUsersRegisteredByEachDay();
+                response = Response.status(200).entity(users).build();
+
+            } catch (Exception e) {
+                response = Response.status(500).entity("Error getting user stats").build();
+            }
+
+        } else {
+            response = Response.status(401).entity("You don't have permission").build();
+        }
+
+        return response;
+    }
+
 }
