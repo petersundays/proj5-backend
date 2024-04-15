@@ -25,7 +25,7 @@ import java.time.LocalDate;
 @NamedQuery(name="Task.countNumberOfNotErasedTasks", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.erased = false")
 @NamedQuery(name="Task.countNumberOfTasksByState", query="SELECT COUNT(a) FROM TaskEntity a WHERE a.stateId = :stateId")
 @NamedQuery(name="Task.findTasksByStateId", query="SELECT a FROM TaskEntity a WHERE a.stateId = :stateId ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
-@NamedQuery(name="Task.totalTasksDoneByEachDay", query="SELECT a.conclusionDate, COUNT(a) FROM TaskEntity a WHERE a.stateId = 300 AND a.erased = false GROUP BY a.conclusionDate")
+@NamedQuery(name="Task.totalTasksDoneByEachDay", query="SELECT a.conclusionDate, (SELECT COUNT(b) FROM TaskEntity b WHERE b.stateId = 300 AND b.conclusionDate <= a.conclusionDate) FROM TaskEntity a WHERE a.stateId = 300 AND a.erased = false GROUP BY a.conclusionDate ORDER BY a.conclusionDate DESC")
 
 public class TaskEntity implements Serializable{
 
