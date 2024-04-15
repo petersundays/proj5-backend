@@ -23,7 +23,7 @@ import java.util.Set;
 @NamedQuery(name = "User.countAllUsers", query = "SELECT COUNT(u) FROM UserEntity u WHERE LOWER(u.username) <> 'notassigned'")
 @NamedQuery(name = "User.countAllUsersByVisibility", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.visible = :visible")
 @NamedQuery(name = "User.countAllUsersByConfirmed", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.confirmed = :confirmed")
-@NamedQuery(name = "User.totalUsersRegisteredByEachDay", query = "SELECT u.registrationDate, COUNT(u) FROM UserEntity u WHERE u.visible = true AND u.confirmed = true GROUP BY u.registrationDate")
+@NamedQuery(name = "User.totalUsersRegisteredByEachDay", query = "SELECT u.registrationDate, (SELECT COUNT(v) FROM UserEntity v WHERE v.visible = true AND v.confirmed = true AND v.registrationDate <= u.registrationDate) FROM UserEntity u WHERE u.visible = true AND u.confirmed = true GROUP BY u.registrationDate ORDER BY u.registrationDate DESC ")
 
 public class UserEntity implements Serializable{
 
