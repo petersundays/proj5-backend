@@ -20,6 +20,7 @@ public class Message {
         this.sender = sender;
         this.receiver = receiver;
         this.timestamp = new Timestamp(System.currentTimeMillis());
+        this.read = false;
     }
 
     public String getContent() {
@@ -61,4 +62,5 @@ public class Message {
     public void setRead(boolean read) {
         this.read = read;
     }
+
 }

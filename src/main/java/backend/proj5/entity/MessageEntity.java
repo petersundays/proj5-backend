@@ -36,6 +36,9 @@ public class MessageEntity implements Serializable {
         @Column (name="'read'", nullable = false, unique = false)
         private boolean read;
 
+        @OneToOne(mappedBy = "message")
+        private NotificationEntity notification;
+
         public MessageEntity() {
         }
 
@@ -44,6 +47,7 @@ public class MessageEntity implements Serializable {
             this.sender = sender;
             this.receiver = receiver;
             this.timestamp = timestamp;
+            this.read = false;
         }
 
         public int getId() {
@@ -92,6 +96,14 @@ public class MessageEntity implements Serializable {
 
         public void setRead(boolean read) {
             this.read = read;
+        }
+
+        public NotificationEntity getNotification() {
+            return notification;
+        }
+
+        public void setNotification(NotificationEntity notification) {
+            this.notification = notification;
         }
 
 }
