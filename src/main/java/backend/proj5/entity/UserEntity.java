@@ -79,6 +79,9 @@ public class UserEntity implements Serializable{
     @OneToMany(mappedBy = "receiver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<MessageEntity> receivedMessages;
 
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<NotificationEntity> notifications;
+
 
     //default empty constructor
     public UserEntity() {}
@@ -206,5 +209,17 @@ public class UserEntity implements Serializable{
 
     public void addNewTasks (ArrayList<TaskEntity> tasks) {
         userTasks.addAll(tasks);
+    }
+
+    public void addNewSentMessages (ArrayList<MessageEntity> messages) {
+        sentMessages.addAll(messages);
+    }
+
+    public void addNewReceivedMessages (ArrayList<MessageEntity> messages) {
+        receivedMessages.addAll(messages);
+    }
+
+    public void addNewNotifications (ArrayList<NotificationEntity> notifications) {
+        this.notifications.addAll(notifications);
     }
 }
