@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Table(name="message")
-@NamedQuery(name="Message.findMessagesBetweenUsers", query="SELECT m FROM MessageEntity m WHERE m.sender = :sender AND m.receiver = :receiver OR m.sender = :receiver AND m.receiver = :sender ORDER BY m.timestamp ASC")
+@NamedQuery(name="Message.findMessagesBetweenUsers", query="SELECT m FROM MessageEntity m WHERE m.sender.username = :sender AND m.receiver.username = :receiver OR m.sender.username = :receiver AND m.receiver.username = :sender ORDER BY m.timestamp ASC")
 @NamedQuery(name="Message.findMessageById", query="SELECT m FROM MessageEntity m WHERE m.id = :id")
 
 

@@ -7,15 +7,15 @@ import java.sql.Timestamp;
 @XmlRootElement
 public class Message {
     private String content;
-    private User sender;
-    private User receiver;
+    private String sender;
+    private String  receiver;
     private Timestamp timestamp;
     private boolean read;
 
     public Message() {
     }
 
-    public Message(String content, User sender, User receiver) {
+    public Message(String content, String sender, String receiver) {
         this.content = content;
         this.sender = sender;
         this.receiver = receiver;
@@ -31,19 +31,19 @@ public class Message {
         this.content = content;
     }
 
-    public User getSender() {
+    public String getSender() {
         return sender;
     }
 
-    public void setSender(User sender) {
+    public void setSender(String sender) {
         this.sender = sender;
     }
 
-    public User getReceiver() {
+    public String getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(User receiver) {
+    public void setReceiver(String receiver) {
         this.receiver = receiver;
     }
 

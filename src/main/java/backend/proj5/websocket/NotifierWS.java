@@ -9,8 +9,8 @@ import java.util.HashMap;
 
 @Singleton
 @ServerEndpoint("/websocket/notifier/{token}")
-public class Notifier {
-    HashMap<String, Session> sessions = new HashMap<String, Session>();
+public class NotifierWS {
+    private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String token, String msg){
         Session session = sessions.get(token);
         if (session != null){
