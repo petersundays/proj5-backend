@@ -11,8 +11,11 @@ import backend.proj5.entity.NotificationEntity;
 import backend.proj5.entity.UserEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import java.util.ArrayList;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
 
 @Stateless
 public class MessageBean implements Serializable {
@@ -32,20 +35,22 @@ public class MessageBean implements Serializable {
     public MessageBean() {
     }
 
-    public boolean sendMessage(String content, String sender, String receiver, String token) {
+    public boolean sendMessage(String content, String sender, String receiver, String token, boolean receiverOnline) {
         boolean sent = false;
 
         User senderUser = userBean.getUser(sender, token);
         User receiverUser = userBean.getUser(receiver, token);
 
         if (senderUser != null && receiverUser != null) {
-            Message message = new Message(content, senderUser, receiverUser);
+            Message message = new Message(content, sender, receiver);
             MessageEntity messageEntity = convertMessageDtoToEntity(message);
             messageDao.persist(messageEntity);
 
-            Notification notification = new Notification(receiverUser, senderUser, message);
-            NotificationEntity notificationEntity = notificationBean.convertNotificationDtoToEntity(messageEntity);
-            notificationDao.persist(notificationEntity);
+            if (!receiverOnline) {
+
+                NotificationEntity notificationEntity = notificationBean.convertNotificationDtoToEntity(messageEntity);
+                notificationDao.persist(notificationEntity);
+            }
 
             sent = true;
         }
@@ -58,8 +63,25 @@ public class MessageBean implements Serializable {
     }
 
     public MessageEntity convertMessageDtoToEntity(Message message) {
-        UserEntity sender = userDao.findUserByUsername(message.getSender().getUsername());
-        UserEntity receiver = userDao.findUserByUsername(message.getReceiver().getUsername());
+        UserEntity sender = userDao.findUserByUsername(message.getSender());
+        UserEntity receiver = userDao.findUserByUsername(message.getReceiver());
         return new MessageEntity(message.getContent(), sender, receiver, message.getTimestamp());
+    }
+
+    public Message convertMessageEntityToDto(MessageEntity messageEntity) {
+        return new Message(messageEntity.getContent(), messageEntity.getSender().getUsername(), messageEntity.getReceiver().getUsername());
+    }
+
+    public ArrayList<Message> getMessages(String token, String receiver) {
+        ArrayList<Message> messages = new ArrayList<>();
+        User user = userBean.findUserByToken(token);
+        if (user != null) {
+            List<MessageEntity> messageEntities = messageDao.findMessagesBetweenUsers(user.getUsername(), receiver);
+            if(messageEntities!=null)
+                for (MessageEntity messageEntity : messageEntities) {
+                    messages.add(convertMessageEntityToDto(messageEntity));
+                }
+        }
+        return messages;
     }
 }

@@ -3,6 +3,9 @@ package backend.proj5.dao;
 import backend.proj5.entity.MessageEntity;
 import jakarta.ejb.Stateless;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Stateless
 public class MessageDao extends AbstractDao<MessageEntity> {
 
@@ -22,10 +25,10 @@ public class MessageDao extends AbstractDao<MessageEntity> {
         }
     }
 
-    public MessageEntity findMessagesBetweenUsers(String sender, String receiver) {
+    public List<MessageEntity> findMessagesBetweenUsers(String sender, String receiver) {
         try {
-            return (MessageEntity) em.createNamedQuery("Message.findMessagesBetweenUsers").setParameter("sender", sender).setParameter("receiver", receiver)
-                    .getSingleResult();
+            return em.createNamedQuery("Message.findMessagesBetweenUsers")
+                    .setParameter("sender", sender).setParameter("receiver", receiver).getResultList();
 
         } catch (Exception e) {
             return null;

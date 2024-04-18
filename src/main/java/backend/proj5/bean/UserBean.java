@@ -385,6 +385,14 @@ public class UserBean implements Serializable {
         }
     }
 
+    public User findUserByToken (String token) {
+        UserEntity userEntity = userDao.findUserByToken(token);
+        if (userEntity != null && userEntity.isVisible() && userEntity.isConfirmed()) {
+            return convertUserEntitytoUserDto(userEntity);
+        }
+        return null;
+    }
+
     public User createUserLogged(User user) {
         User userLogged = new User();
         userLogged.setUsername(user.getUsername());

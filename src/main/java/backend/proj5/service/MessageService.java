@@ -1,3 +1,4 @@
+/*
 package backend.proj5.service;
 
 import backend.proj5.bean.MessageBean;
@@ -38,3 +39,4 @@ public class MessageService {
     }
 
 }
+*/
