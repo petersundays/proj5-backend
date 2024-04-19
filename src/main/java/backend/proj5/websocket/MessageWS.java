@@ -2,10 +2,8 @@ package backend.proj5.websocket;
 
 import backend.proj5.bean.MessageBean;
 import backend.proj5.bean.UserBean;
-import backend.proj5.dao.UserDao;
 import backend.proj5.dto.Message;
 import backend.proj5.dto.User;
-import backend.proj5.entity.UserEntity;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import jakarta.ejb.EJB;
@@ -44,11 +42,16 @@ public class MessageWS {
     }
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token,@PathParam("receiver") String receiver){
+
         if (userBean.isAuthenticated(token)) {
             System.out.println("A new WebSocket session is opened for client with token: " + token + " and receiver: " + receiver);
             sessions.put(token, session);
             ArrayList<Message> messages = messageBean.getMessages(token, receiver);
+            User user = userBean.getUserByToken(token);
             for (Message message : messages) {
+                if (message.getReceiver().equals(user.getUsername()) && !message.isRead()) {
+                    messageBean.markMessageAsRead(user.getUsername());
+                }
                 send(token, new Gson().toJson(message));
             }
         }
@@ -69,14 +72,14 @@ public class MessageWS {
         System.out.println("Received message: "+msg);
 
         String token = session.getPathParameters().get("token");
-        String sender;
-        String receiver;
+        User userSender = userBean.getUserByToken(token);
+        User userReceiver = userBean.getUserByUsername(session.getPathParameters().get("receiver"));
+        String sender = userSender.getUsername();
+        String receiver = userReceiver.getUsername();
         String content;
 
         try {
             JsonObject jsonObject = Json.createReader(new StringReader(msg)).readObject();
-            sender = jsonObject.getString("sender");
-            receiver = jsonObject.getString("receiver");
             content = jsonObject.getString("content");
         } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON format" + e.getMessage());
@@ -99,7 +102,7 @@ public class MessageWS {
             }
         }
 
-        if (messageBean.sendMessage(content, sender, receiver, token, receiverOnline)) {
+        if (messageBean.sendMessage(content, userSender, userReceiver, token, receiverOnline)) {
             System.out.println("Message sent successfully");
 
             if (receiverOnline) {

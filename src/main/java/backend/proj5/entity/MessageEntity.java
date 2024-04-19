@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 @Table(name="message")
 @NamedQuery(name="Message.findMessagesBetweenUsers", query="SELECT m FROM MessageEntity m WHERE m.sender.username = :sender AND m.receiver.username = :receiver OR m.sender.username = :receiver AND m.receiver.username = :sender ORDER BY m.timestamp ASC")
 @NamedQuery(name="Message.findMessageById", query="SELECT m FROM MessageEntity m WHERE m.id = :id")
-
+@NamedQuery(name="Message.findMessagesUnreadForUser", query="SELECT m FROM MessageEntity m WHERE m.receiver.username = :username AND m.read = false")
 
 public class MessageEntity implements Serializable {
 
