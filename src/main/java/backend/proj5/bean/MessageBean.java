@@ -35,14 +35,11 @@ public class MessageBean implements Serializable {
     public MessageBean() {
     }
 
-    public boolean sendMessage(String content, String sender, String receiver, String token, boolean receiverOnline) {
+    public boolean sendMessage(String content, User sender, User receiver, String token, boolean receiverOnline) {
         boolean sent = false;
 
-        User senderUser = userBean.getUser(sender, token);
-        User receiverUser = userBean.getUser(receiver, token);
-
-        if (senderUser != null && receiverUser != null) {
-            Message message = new Message(content, sender, receiver);
+        if (sender != null && receiver != null) {
+            Message message = new Message(content, sender.getUsername(), receiver.getUsername());
             MessageEntity messageEntity = convertMessageDtoToEntity(message);
             if (receiverOnline) {
                 messageEntity.setRead(true);
@@ -61,8 +58,12 @@ public class MessageBean implements Serializable {
         return sent;
     }
 
-    public void markMessageAsRead(Message message) {
-        message.setRead(true);
+    public void markMessageAsRead(String username) {
+        ArrayList<MessageEntity> messages = messageDao.findMessagesUnreadForUser(username);
+        for (MessageEntity message : messages) {
+            message.setRead(true);
+            messageDao.merge(message);
+        }
     }
 
     public MessageEntity convertMessageDtoToEntity(Message message) {

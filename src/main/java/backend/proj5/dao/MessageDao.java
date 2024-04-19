@@ -34,4 +34,14 @@ public class MessageDao extends AbstractDao<MessageEntity> {
             return null;
         }
     }
+
+    public ArrayList<MessageEntity> findMessagesUnreadForUser(String username) {
+        try {
+            return (ArrayList<MessageEntity>) em.createNamedQuery("Message.findMessagesUnreadForUser")
+                    .setParameter("username", username).getResultList();
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
