@@ -1,5 +1,7 @@
 package backend.proj5.websocket;
 
+import backend.proj5.bean.UserBean;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -10,6 +12,9 @@ import java.util.HashMap;
 @Singleton
 @ServerEndpoint("/websocket/notifier/{token}")
 public class NotifierWS {
+    @EJB
+    private UserBean userbean;
+
     private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String token, String msg){
         Session session = sessions.get(token);
@@ -25,7 +30,10 @@ public class NotifierWS {
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token){
         System.out.println("A new WebSocket session is opened for client with token: "+ token);
-        sessions.put(token,session);
+        if (userbean.isAuthenticated(token)) {
+            sessions.put(token,session);
+        }
+
     }
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {

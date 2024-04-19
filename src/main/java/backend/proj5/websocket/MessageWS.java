@@ -1,8 +1,10 @@
 package backend.proj5.websocket;
 
 import backend.proj5.bean.MessageBean;
+import backend.proj5.bean.UserBean;
 import backend.proj5.dao.UserDao;
 import backend.proj5.dto.Message;
+import backend.proj5.dto.User;
 import backend.proj5.entity.UserEntity;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -19,12 +21,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 @Singleton
-@ServerEndpoint("/websocket/messages/{token}")
+@ServerEndpoint("/websocket/messages/{token}/{receiver}")
 public class MessageWS {
     @EJB
     private MessageBean messageBean;
     @EJB
-    private UserDao userDao;
+    private UserBean userBean;
+    @EJB
+    private NotifierWS notifierWS;
 
     private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String token, String msg){
@@ -39,9 +43,15 @@ public class MessageWS {
         }
     }
     @OnOpen
-    public void toDoOnOpen(Session session, @PathParam("token") String token){
-        System.out.println("A new WebSocket session is opened for client with token: "+ token);
-        sessions.put(token,session);
+    public void toDoOnOpen(Session session, @PathParam("token") String token,@PathParam("receiver") String receiver){
+        if (userBean.isAuthenticated(token)) {
+            System.out.println("A new WebSocket session is opened for client with token: " + token + " and receiver: " + receiver);
+            sessions.put(token, session);
+            ArrayList<Message> messages = messageBean.getMessages(token, receiver);
+            for (Message message : messages) {
+                send(token, new Gson().toJson(message));
+            }
+        }
     }
 
     @OnClose
@@ -73,14 +83,18 @@ public class MessageWS {
             return;
         }
 
-        UserEntity receiverEntity = userDao.findUserByUsername(receiver);
-        String receiverToken = receiverEntity.getToken();
+        User user = userBean.getUserByUsername(receiver);
+        String receiverToken = user.getToken();
         boolean receiverOnline = false;
 
         if (receiverToken != null) {
             for (String key : sessions.keySet()) {
                 if (key.equals(receiverToken)) {
-                    receiverOnline = true;
+                    Session receiverSession = sessions.get(key);
+                    String receiverUsername = receiverSession.getPathParameters().get("receiver");
+                    if (receiverUsername.equals(sender)) {
+                        receiverOnline = true;
+                    }
                 }
             }
         }

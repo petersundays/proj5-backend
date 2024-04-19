@@ -18,11 +18,9 @@ import java.io.Serializable;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 
 @Stateless
@@ -164,11 +162,15 @@ public class UserBean implements Serializable {
                 }
 
                 UserEntity userEntity = convertUserDtotoUserEntity(user);
-                userEntity.setValidationToken(generateValidationToken(48*60));
-
-                if (emailBean.sendConfirmationEmail(user, userEntity.getValidationToken())) {
+                if (userEntity.getUsername().equalsIgnoreCase("admin")) {
                     userDao.persist(userEntity);
-                    return true;
+                } else {
+                    userEntity.setValidationToken(generateValidationToken(48 * 60));
+
+                    if (emailBean.sendConfirmationEmail(user, userEntity.getValidationToken())) {
+                        userDao.persist(userEntity);
+                        return true;
+                    }
                 }
             }
         } else {
@@ -383,6 +385,14 @@ public class UserBean implements Serializable {
         } else {
             return null;
         }
+    }
+
+    public User getUserByUsername(String username) {
+        UserEntity u = userDao.findUserByUsername(username);
+        if (u != null) {
+            return convertUserEntitytoUserDto(u);
+        }
+        return null;
     }
 
     public User findUserByToken (String token) {

@@ -44,6 +44,9 @@ public class MessageBean implements Serializable {
         if (senderUser != null && receiverUser != null) {
             Message message = new Message(content, sender, receiver);
             MessageEntity messageEntity = convertMessageDtoToEntity(message);
+            if (receiverOnline) {
+                messageEntity.setRead(true);
+            }
             messageDao.persist(messageEntity);
 
             if (!receiverOnline) {
@@ -75,8 +78,9 @@ public class MessageBean implements Serializable {
     public ArrayList<Message> getMessages(String token, String receiver) {
         ArrayList<Message> messages = new ArrayList<>();
         User user = userBean.findUserByToken(token);
+
         if (user != null) {
-            List<MessageEntity> messageEntities = messageDao.findMessagesBetweenUsers(user.getUsername(), receiver);
+            ArrayList<MessageEntity> messageEntities = messageDao.findMessagesBetweenUsers(user.getUsername(), receiver);
             if(messageEntities!=null)
                 for (MessageEntity messageEntity : messageEntities) {
                     messages.add(convertMessageEntityToDto(messageEntity));

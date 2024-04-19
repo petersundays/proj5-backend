@@ -25,9 +25,9 @@ public class MessageDao extends AbstractDao<MessageEntity> {
         }
     }
 
-    public List<MessageEntity> findMessagesBetweenUsers(String sender, String receiver) {
+    public ArrayList<MessageEntity> findMessagesBetweenUsers(String sender, String receiver) {
         try {
-            return em.createNamedQuery("Message.findMessagesBetweenUsers")
+            return (ArrayList<MessageEntity>) em.createNamedQuery("Message.findMessagesBetweenUsers")
                     .setParameter("sender", sender).setParameter("receiver", receiver).getResultList();
 
         } catch (Exception e) {
