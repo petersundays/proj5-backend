@@ -1,15 +1,14 @@
-/*
 package backend.proj5.service;
 
 import backend.proj5.bean.MessageBean;
 import backend.proj5.bean.UserBean;
+import backend.proj5.dto.Message;
 import backend.proj5.dto.User;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+
+import java.util.ArrayList;
 
 @Path("/messages")
 public class MessageService {
@@ -20,7 +19,7 @@ public class MessageService {
     private UserBean userBean;
 
 
-    @POST
+    /*@POST
     @Path("/{receiver}")
     public Response sendMessage(@HeaderParam("token") String token, @PathParam("receiver") String receiver, String content) {
 
@@ -36,7 +35,21 @@ public class MessageService {
             response = Response.status(Response.Status.UNAUTHORIZED).build();
         }
         return response;
-    }
+    }*/
 
+    @GET
+    @Path("/{receiver}")
+    @Produces("application/json")
+    public Response getMessagesBetweenUsers(@HeaderParam("token") String token, @PathParam("receiver") String receiver) {
+
+        Response response;
+
+        if(userBean.isAuthenticated(token)) {
+            ArrayList<Message> messages = messageBean.getMessages(token, receiver);
+            response = Response.status(Response.Status.OK).entity(messages).build();
+        } else {
+            response = Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        return response;
+    }
 }
-*/
