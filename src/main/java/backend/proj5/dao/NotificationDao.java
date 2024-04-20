@@ -3,6 +3,8 @@ package backend.proj5.dao;
 import backend.proj5.entity.NotificationEntity;
 import jakarta.ejb.Stateless;
 
+import java.util.ArrayList;
+
 @Stateless
 public class NotificationDao extends AbstractDao<NotificationEntity> {
 
@@ -12,21 +14,33 @@ public class NotificationDao extends AbstractDao<NotificationEntity> {
         super(NotificationEntity.class);
     }
 
-    public NotificationEntity findNotificationById(String id) {
+    public ArrayList<NotificationEntity> findNotificationById(String id) {
         try {
-            return (NotificationEntity) em.createNamedQuery("Notification.findNotificationById").setParameter("id", id)
-                    .getSingleResult();
+
+            return (ArrayList<NotificationEntity>) em.createNamedQuery("Notification.findNotificationById").setParameter("id", id)
+                    .getResultList();
 
         } catch (Exception e) {
             return null;
         }
     }
 
-    public NotificationEntity findNotificationsForUser(String username) {
+    public ArrayList<NotificationEntity> findNotificationsForUser(String username) {
         try {
-            return (NotificationEntity) em.createNamedQuery("Notification.findNotificationsForUser").setParameter("username", username)
-                    .getSingleResult();
+            return (ArrayList<NotificationEntity>) em.createNamedQuery("Notification.findNotificationsForUser").setParameter("username", username)
+                    .getResultList();
 
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public NotificationEntity findLatestNotificationForSender(String username) {
+        try {
+            return (NotificationEntity) em.createNamedQuery("Notification.findLatestNotificationForSender")
+                    .setParameter("username", username)
+                    .setMaxResults(1)
+                    .getSingleResult();
         } catch (Exception e) {
             return null;
         }

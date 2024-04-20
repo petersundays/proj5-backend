@@ -60,11 +60,7 @@ public class MessageWS {
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
         System.out.println("Websocket session is closed with CloseCode: " + reason.getCloseCode() + ": " + reason.getReasonPhrase());
-        for (String key : sessions.keySet()) {
-            if (sessions.get(key) == session) {
-                sessions.remove(key);
-            }
-        }
+        sessions.entrySet().removeIf(entry -> entry.getValue().equals(session));
     }
 
     @OnMessage

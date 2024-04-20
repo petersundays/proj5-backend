@@ -9,13 +9,13 @@ import backend.proj5.dto.User;
 import backend.proj5.entity.MessageEntity;
 import backend.proj5.entity.NotificationEntity;
 import backend.proj5.entity.UserEntity;
+import backend.proj5.websocket.NotifierWS;
+import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import java.util.ArrayList;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
 
 @Stateless
 public class MessageBean implements Serializable {
@@ -29,6 +29,8 @@ public class MessageBean implements Serializable {
     private NotificationDao notificationDao;
     @EJB
     private NotificationBean notificationBean;
+    @EJB
+    private NotifierWS notifierWS;
 
     private static final long serialVersionUID = 1L;
 
@@ -48,8 +50,14 @@ public class MessageBean implements Serializable {
 
             if (!receiverOnline) {
 
-                NotificationEntity notificationEntity = notificationBean.convertNotificationDtoToEntity(messageEntity);
+                NotificationEntity notificationEntity = new NotificationEntity(messageEntity.getReceiver(), messageEntity.getSender(), messageEntity);
                 notificationDao.persist(notificationEntity);
+                String receiverToken = userDao.findUserByUsername(receiver.getUsername()).getToken();
+                if (receiverToken != null) {
+                    NotificationEntity completeNotificationEntity = notificationDao.findLatestNotificationForSender(sender.getUsername());
+                    Notification notification = notificationBean.convertNotificationEntityToDto(completeNotificationEntity);
+                    notifierWS.send(receiverToken, new Gson().toJson(notification));
+                }
             }
 
             sent = true;
