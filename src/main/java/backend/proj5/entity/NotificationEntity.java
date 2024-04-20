@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @Table(name="notification")
 
 @NamedQuery(name="Notification.findNotificationById", query="SELECT n FROM NotificationEntity n WHERE n.id = :id")
-@NamedQuery(name="Notification.findNotificationsForUser", query="SELECT n FROM NotificationEntity n WHERE n.receiver = :username")
+@NamedQuery(name="Notification.findNotificationsForUser", query="SELECT n FROM NotificationEntity n WHERE n.receiver.username = :username")
 
 
 public class NotificationEntity implements Serializable {
