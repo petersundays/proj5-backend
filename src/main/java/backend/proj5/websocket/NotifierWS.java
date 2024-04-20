@@ -27,7 +27,7 @@ public class NotifierWS {
     public void send(String token, String msg){
         Session session = sessions.get(token);
         if (session != null){
-            System.out.println("sending.......... "+msg);
+
             try {
                 session.getBasicRemote().sendText(msg);
             } catch (IOException e) {
@@ -38,11 +38,14 @@ public class NotifierWS {
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token){
 
+        if (sessions.containsKey(token)) {
+            return;
+        }
+
         if(userbean.isAuthenticated(token)) {
             System.out.println("A new WebSocket session is opened for client with token: " + token);
-            if (userbean.isAuthenticated(token)) {
-                sessions.put(token, session);
-            }
+
+            sessions.put(token, session);
 
             String username = userbean.findUserByToken(token).getUsername();
             ArrayList<Notification> notifications = notificationBean.findNotificationsForUser(username);
@@ -50,7 +53,10 @@ public class NotifierWS {
             if (notifications != null) {
                 
                 for (Notification notification : notifications) {
-                    send(token, new Gson().toJson(notification));
+                    if (!notification.isRead()) {
+                        System.out.println("#*#*#*#*#*# TimeStamp of notification: " + notification.getTimestamp());
+                        send(token, new Gson().toJson(notification));
+                    }
                 }
             }
         }

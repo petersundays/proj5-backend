@@ -8,14 +8,14 @@ import java.sql.Timestamp;
 public class Notification {
     private boolean read;
     private Timestamp timestamp;
-    private User receiver;
-    private User sender;
+    private String receiver;
+    private String sender;
     private Message message;
 
     public Notification() {
     }
 
-    public Notification(User receiver, User sender, Message message) {
+    public Notification(String receiver, String sender, Message message) {
         this.receiver = receiver;
         this.sender = sender;
         this.timestamp = new Timestamp(System.currentTimeMillis());
@@ -39,19 +39,19 @@ public class Notification {
         this.timestamp = timestamp;
     }
 
-    public User getReceiver() {
+    public String getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(User receiver) {
+    public void setReceiver(String receiver) {
         this.receiver = receiver;
     }
 
-    public User getSender() {
+    public String getSender() {
         return sender;
     }
 
-    public void setSender(User sender) {
+    public void setSender(String sender) {
         this.sender = sender;
     }
 

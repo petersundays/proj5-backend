@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 
 @NamedQuery(name="Notification.findNotificationById", query="SELECT n FROM NotificationEntity n WHERE n.id = :id")
 @NamedQuery(name="Notification.findNotificationsForUser", query="SELECT n FROM NotificationEntity n WHERE n.receiver.username = :username")
-
+@NamedQuery(name="Notification.findLatestNotificationForSender", query="SELECT n FROM NotificationEntity n WHERE n.sender.username = :username ORDER BY n.id DESC")
 
 public class NotificationEntity implements Serializable {
     private static final long serialVersionUID = 1L;

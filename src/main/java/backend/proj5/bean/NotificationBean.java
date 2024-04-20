@@ -38,12 +38,17 @@ public class NotificationBean implements Serializable {
         User receiver = userBean.getUserByUsername(notificationEntity.getReceiver().getUsername());
         User sender = userBean.getUserByUsername(notificationEntity.getSender().getUsername());
         Message message = messageBean.convertMessageEntityToDto(notificationEntity.getMessage());
-        return new Notification(receiver, sender, message);
+        Notification notification = new Notification(receiver.getUsername(), sender.getUsername(), message);
+        notification.setTimestamp(notificationEntity.getTimestamp());
+        notification.setRead(notificationEntity.isRead());
+        return notification;
     }
 
     public NotificationEntity convertNotificationDtoToEntity(Notification notification) {
-        UserEntity receiver = userBean.convertUserDtotoUserEntity(notification.getReceiver());
-        UserEntity sender = userBean.convertUserDtotoUserEntity(notification.getSender());
+        User receiverDto = userBean.getUserByUsername(notification.getReceiver());
+        User senderDto = userBean.getUserByUsername(notification.getSender());
+        UserEntity receiver = userBean.convertUserDtotoUserEntity(receiverDto);
+        UserEntity sender = userBean.convertUserDtotoUserEntity(senderDto);
         MessageEntity message = messageBean.convertMessageDtoToEntity(notification.getMessage());
         return new NotificationEntity(receiver, sender, message);
     }

@@ -54,7 +54,8 @@ public class MessageBean implements Serializable {
                 notificationDao.persist(notificationEntity);
                 String receiverToken = userDao.findUserByUsername(receiver.getUsername()).getToken();
                 if (receiverToken != null) {
-                    Notification notification = notificationBean.convertNotificationEntityToDto(notificationEntity);
+                    NotificationEntity completeNotificationEntity = notificationDao.findLatestNotificationForSender(sender.getUsername());
+                    Notification notification = notificationBean.convertNotificationEntityToDto(completeNotificationEntity);
                     notifierWS.send(receiverToken, new Gson().toJson(notification));
                 }
             }
