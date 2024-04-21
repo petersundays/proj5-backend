@@ -35,12 +35,33 @@ public class NotificationDao extends AbstractDao<NotificationEntity> {
         }
     }
 
+    public ArrayList<NotificationEntity> findNotificationBySenderAndReceiver(String sender, String receiver) {
+        try {
+            return (ArrayList<NotificationEntity>) em.createNamedQuery("Notification.findNotificationBySenderAndReceiver")
+                    .setParameter("sender", sender)
+                    .setParameter("receiver", receiver)
+                    .getResultList();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public NotificationEntity findLatestNotificationForSender(String username) {
         try {
             return (NotificationEntity) em.createNamedQuery("Notification.findLatestNotificationForSender")
                     .setParameter("username", username)
                     .setMaxResults(1)
                     .getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public ArrayList<NotificationEntity> findUnreadNotificationsForUser(String username) {
+        try {
+            return (ArrayList<NotificationEntity>) em.createNamedQuery("Notification.findUnreadNotificationsForUser")
+                    .setParameter("username", username)
+                    .getResultList();
         } catch (Exception e) {
             return null;
         }

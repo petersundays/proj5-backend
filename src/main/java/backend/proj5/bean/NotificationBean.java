@@ -1,7 +1,6 @@
 package backend.proj5.bean;
 
 import backend.proj5.dao.NotificationDao;
-import backend.proj5.dao.UserDao;
 import backend.proj5.dto.Message;
 import backend.proj5.dto.Notification;
 import backend.proj5.dto.User;
@@ -10,7 +9,6 @@ import backend.proj5.entity.NotificationEntity;
 import backend.proj5.entity.UserEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,8 +28,12 @@ public class NotificationBean implements Serializable {
     public NotificationBean() {
     }
 
-    public void markNotificationAsRead(Notification notification) {
-        notification.setRead(true);
+    public void markNotificationAsRead(String sender, String receiver) {
+        ArrayList<NotificationEntity> notifications = notificationDao.findNotificationBySenderAndReceiver(sender, receiver);
+        for (NotificationEntity notification : notifications) {
+            notification.setRead(true);
+            notificationDao.merge(notification);
+        }
     }
 
     public Notification convertNotificationEntityToDto(NotificationEntity notificationEntity) {
@@ -55,6 +57,18 @@ public class NotificationBean implements Serializable {
 
     public ArrayList<Notification> findNotificationsForUser(String username) {
         ArrayList<NotificationEntity> notificationEntities = notificationDao.findNotificationsForUser(username);
+        ArrayList<Notification> notifications = new ArrayList<>();
+
+        if (notificationEntities != null) {
+            for (NotificationEntity notificationEntity : notificationEntities) {
+                notifications.add(convertNotificationEntityToDto(notificationEntity));
+            }
+        }
+        return notifications;
+    }
+
+    public ArrayList<Notification> findUnreadNotificationsForUser(String username) {
+        ArrayList<NotificationEntity> notificationEntities = notificationDao.findUnreadNotificationsForUser(username);
         ArrayList<Notification> notifications = new ArrayList<>();
 
         if (notificationEntities != null) {
