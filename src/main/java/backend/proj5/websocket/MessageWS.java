@@ -32,7 +32,6 @@ public class MessageWS {
     public void send(String token, String msg){
         Session session = sessions.get(token);
         if (session != null){
-            System.out.println("sending.......... "+msg);
             try {
                 session.getBasicRemote().sendText(msg);
             } catch (IOException e) {
@@ -44,7 +43,6 @@ public class MessageWS {
     public void toDoOnOpen(Session session, @PathParam("token") String token,@PathParam("receiver") String receiver){
 
         if (userBean.isAuthenticated(token)) {
-            System.out.println("A new WebSocket session is opened for client with token: " + token + " and receiver: " + receiver);
             sessions.put(token, session);
             ArrayList<Message> messages = messageBean.getMessages(token, receiver);
             User user = userBean.getUserByToken(token);
@@ -65,7 +63,6 @@ public class MessageWS {
 
     @OnMessage
     public void toDoOnMessage(Session session, String msg){
-        System.out.println("Received message: "+msg);
 
         String token = session.getPathParameters().get("token");
         User userSender = userBean.getUserByToken(token);
@@ -99,7 +96,6 @@ public class MessageWS {
         }
 
         if (messageBean.sendMessage(content, userSender, userReceiver, token, receiverOnline)) {
-            System.out.println("Message sent successfully");
 
             if (receiverOnline) {
                 send(receiverToken, new Gson().toJson(new Message(content, sender, receiver)));
