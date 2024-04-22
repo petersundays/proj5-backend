@@ -3,10 +3,12 @@ package backend.proj5.bean;
 import backend.proj5.dao.TaskDao;
 import backend.proj5.dao.UserDao;
 import backend.proj5.dto.Login;
+import backend.proj5.dto.Statistics;
 import backend.proj5.dto.Task;
 import backend.proj5.dto.User;
 import backend.proj5.entity.TaskEntity;
 import backend.proj5.entity.UserEntity;
+import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import org.mindrot.jbcrypt.BCrypt;
@@ -34,6 +36,8 @@ public class UserBean implements Serializable {
     private TaskBean taskBean;
     @EJB
     private EmailBean emailBean;
+    @EJB
+    private CategoryBean categoryBean;
 
     public UserBean(){}
 
@@ -865,5 +869,31 @@ public class UserBean implements Serializable {
 
     public List<Object[]> getTotalUsersRegisteredByEachDay() {
         return userDao.totalUsersRegisteredByEachDay();
+    }
+
+    public Statistics getAllStatistics() {
+
+        Statistics statistics = new Statistics();
+
+        try {
+            Number[] userStats = userStats();
+            statistics.setUserStats(userStats);
+
+            double averageTaskTime = taskBean.averageTimeToFinishTask();
+            statistics.setAverageTaskTime(averageTaskTime);
+
+            ArrayList<String> categories = categoryBean.listCategoriesByNumberOfTasks();
+            statistics.setCategories(categories);
+
+            List<Object[]> totalTasksDoneByEachDay = taskBean.totalTasksDoneByEachDay();
+            statistics.setTotalTasksDoneByEachDay(totalTasksDoneByEachDay);
+
+            List<Object[]> usersRegistred = getTotalUsersRegisteredByEachDay();
+            statistics.setUsersRegistred(usersRegistred);
+
+        } catch (Exception e) {
+            System.out.println("Something went wrong!");
+        }
+        return statistics;
     }
 }

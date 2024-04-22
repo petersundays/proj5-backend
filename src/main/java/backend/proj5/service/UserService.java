@@ -225,7 +225,7 @@ public class UserService {
         return response;
     }
 
-    //PATHestá desta forma e não 'visibility/{visible}', pq o pedido "getUser" nem sempre funcionava
+    //PATH está desta forma e não 'visibility/{visible}', pq o pedido "getUser" nem sempre funcionava
     // dava erro "multiple resources" com este pedido e com o"getUsers"
     @GET
     @Path("/visibility/{visible}")

@@ -25,8 +25,6 @@ public class MessageWS {
     private MessageBean messageBean;
     @EJB
     private UserBean userBean;
-    @EJB
-    private NotifierWS notifierWS;
 
     private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String token, String msg){
