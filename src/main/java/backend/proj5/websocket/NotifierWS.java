@@ -4,12 +4,12 @@ import backend.proj5.bean.NotificationBean;
 import backend.proj5.bean.UserBean;
 import backend.proj5.dto.Notification;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.json.Json;
 import jakarta.json.JsonException;
-import jakarta.json.JsonObject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -40,7 +40,7 @@ public class NotifierWS {
     }
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token){
-
+        System.out.println("***************** open NotifierWS");
         if (sessions.containsKey(token)) {
             return;
         }
@@ -64,7 +64,7 @@ public class NotifierWS {
 
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
-        System.out.println("Websocket session is closed with CloseCode: " + reason.getCloseCode() + ": " + reason.getReasonPhrase());
+        System.out.println("******Websocket session is closed with CloseCode: " + reason.getCloseCode() + ": " + reason.getReasonPhrase());
         sessions.entrySet().removeIf(entry -> entry.getValue().equals(session));
     }
 
@@ -75,12 +75,12 @@ public class NotifierWS {
         String receiver = userbean.findUserByToken(receiverToken).getUsername();
         String sender = "";
 
+        Gson gson = new Gson();
         try {
-            JsonObject jsonObject = Json.createReader(new StringReader(msg)).readObject();
-            sender = jsonObject.getString("sender");
-        } catch (JsonException e) {
+            JsonObject jsonObject = gson.fromJson(msg, JsonObject.class);
+            sender = jsonObject.get("sender").getAsString();
+        } catch (JsonSyntaxException e) {
             System.out.println("Invalid JSON format: " + e.getMessage());
-            return;
         }
 
         notificationBean.markNotificationAsRead(sender, receiver);

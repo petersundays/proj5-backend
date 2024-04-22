@@ -20,7 +20,7 @@ import java.util.HashMap;
 @ServerEndpoint("/websocket/stats/{token}")
 
 public class StatisticsWS {
-    @EJB
+   /* @EJB
     private MessageBean messageBean;
     @EJB
     private UserBean userBean;
@@ -28,12 +28,13 @@ public class StatisticsWS {
     private TaskBean taskBean;
     @EJB
     private CategoryBean categoryBean;
-
+*/
     private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String token, String msg){
         Session session = sessions.get(token);
         if (session != null){
             try {
+                System.out.println("Sending message to client : " + msg);
                 session.getBasicRemote().sendText(msg);
             } catch (IOException e) {
                 System.out.println("Something went wrong!");
@@ -44,10 +45,10 @@ public class StatisticsWS {
     public void toDoOnOpen(Session session, @PathParam("token") String token){
         System.out.println("A new WebSocket Statistics session is opened for client with token: " + token);
 
-        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
+       // if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
             sessions.put(token, session);
 
-            Statistics statistics;
+           /* Statistics statistics;
 
             try {
                 statistics = userBean.getAllStatistics();
@@ -55,12 +56,12 @@ public class StatisticsWS {
                 send(token, new Gson().toJson(statistics));
 
             } catch (Exception e) {
-                System.out.println("Something went wrong!");
+                System.out.println("Alguma coisa went wrong!");
             }
 
         } else {
             System.out.println("User not authenticated or not a product owner");
-        }
+        }*/
     }
 
     @OnClose
@@ -72,7 +73,7 @@ public class StatisticsWS {
     @OnMessage
     public void toDoOnMessage(Session session, String msg){
 
-        Statistics statistics = null;
+       /* Statistics statistics = null;
         String token = session.getPathParameters().get("token");
 
         try {
@@ -88,7 +89,7 @@ public class StatisticsWS {
 
         } else {
             System.out.println("No statistics found");
-        }
+        }*/
 
     }
 

@@ -5,11 +5,11 @@ import backend.proj5.bean.UserBean;
 import backend.proj5.dto.Message;
 import backend.proj5.dto.User;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.json.Json;
-import jakarta.json.JsonObject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -21,10 +21,10 @@ import java.util.HashMap;
 @Singleton
 @ServerEndpoint("/websocket/messages/{token}/{receiver}")
 public class MessageWS {
-    @EJB
-    private MessageBean messageBean;
-    @EJB
-    private UserBean userBean;
+    //@EJB
+    //private MessageBean messageBean;
+    //@EJB
+    //private UserBean userBean;
 
     private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String token, String msg){
@@ -39,10 +39,11 @@ public class MessageWS {
     }
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token,@PathParam("receiver") String receiver){
+        System.out.println("***************** open MessageWS");
 
-        if (userBean.isAuthenticated(token)) {
+       // if (userBean.isAuthenticated(token)) {
             sessions.put(token, session);
-            ArrayList<Message> messages = messageBean.getMessages(token, receiver);
+      /*      ArrayList<Message> messages = messageBean.getMessages(token, receiver);
             User user = userBean.getUserByToken(token);
             for (Message message : messages) {
                 if (message.getReceiver().equals(user.getUsername()) && !message.isRead()) {
@@ -50,7 +51,7 @@ public class MessageWS {
                 }
                 send(token, new Gson().toJson(message));
             }
-        }
+        }*/
     }
 
     @OnClose
@@ -63,22 +64,23 @@ public class MessageWS {
     public void toDoOnMessage(Session session, String msg){
 
         String token = session.getPathParameters().get("token");
-        User userSender = userBean.getUserByToken(token);
-        User userReceiver = userBean.getUserByUsername(session.getPathParameters().get("receiver"));
-        String sender = userSender.getUsername();
-        String receiver = userReceiver.getUsername();
+    //    User userSender = userBean.getUserByToken(token);
+    //    User userReceiver = userBean.getUserByUsername(session.getPathParameters().get("receiver"));
+     //   String sender = userSender.getUsername();
+      //  String receiver = userReceiver.getUsername();
         String content;
 
+        Gson gson = new Gson();
         try {
-            JsonObject jsonObject = Json.createReader(new StringReader(msg)).readObject();
-            content = jsonObject.getString("content");
+            JsonObject jsonObject = gson.fromJson(msg, JsonObject.class);
+            content = jsonObject.get("content").getAsString();
         } catch (JsonSyntaxException e) {
-            System.out.println("Invalid JSON format" + e.getMessage());
+            System.out.println("Invalid JSON format: " + e.getMessage());
             return;
         }
 
-        User user = userBean.getUserByUsername(receiver);
-        String receiverToken = user.getToken();
+     //   User user = userBean.getUserByUsername(receiver);
+       /* String receiverToken = user.getToken();
         boolean receiverOnline = false;
 
         if (receiverToken != null) {
@@ -107,6 +109,6 @@ public class MessageWS {
 
         } else {
             System.out.println("Message not sent");
-        }
+        }*/
     }
 }
