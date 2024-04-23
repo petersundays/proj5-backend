@@ -5,7 +5,9 @@ import backend.proj5.bean.MessageBean;
 import backend.proj5.bean.TaskBean;
 import backend.proj5.bean.UserBean;
 import backend.proj5.dto.Statistics;
+import backend.proj5.service.LocalDateAdapter;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.websocket.*;
@@ -14,6 +16,7 @@ import jakarta.websocket.server.ServerEndpoint;
 
 import java.io.IOException;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 
 @Singleton
@@ -53,10 +56,15 @@ public class StatisticsWS {
             try {
                 statistics = userBean.getAllStatistics();
 
-                send(token, new Gson().toJson(statistics));
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                        .create();
+
+                send(token, gson.toJson(statistics));
 
             } catch (Exception e) {
-                System.out.println("Alguma coisa went wrong!");
+                System.out.println("Something went wrong!");
+                e.printStackTrace();
             }
 
         } else {
@@ -72,11 +80,11 @@ public class StatisticsWS {
 
     @OnMessage
     public void toDoOnMessage(Session session, String msg){
-
+        System.out.println("to do on message 1");
         Statistics statistics = null;
-        String token = session.getPathParameters().get("token");
 
         try {
+            System.out.println("to do on message 2");
             statistics = userBean.getAllStatistics();
 
         } catch (Exception e) {
@@ -84,8 +92,14 @@ public class StatisticsWS {
         }
 
         if (statistics != null) {
+            System.out.println("to do on message 3");
             Statistics finalStatistics = statistics;
-            sessions.forEach((key, value) -> send(key, new Gson().toJson(finalStatistics)));
+            System.out.println("finalStatistics: " + finalStatistics);
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                    .create();
+
+            sessions.forEach((key, value) -> send(key, gson.toJson(finalStatistics)));
 
         } else {
             System.out.println("No statistics found");

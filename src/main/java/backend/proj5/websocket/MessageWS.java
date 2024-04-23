@@ -37,7 +37,6 @@ public class MessageWS {
     }
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token,@PathParam("receiver") String receiver){
-        System.out.println("***************** open MessageWS");
 
         if (userBean.isAuthenticated(token)) {
             sessions.put(token, session);

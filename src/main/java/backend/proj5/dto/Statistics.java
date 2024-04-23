@@ -1,6 +1,7 @@
 package backend.proj5.dto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Statistics {
@@ -8,7 +9,7 @@ public class Statistics {
     private double averageTaskTime;
     private ArrayList<String> categories;
     private List<Object[]> totalTasksDoneByEachDay;
-    private List<Object[]> usersRegistred;
+    private List<Object[]> usersRegistered;
 
     public Statistics() {
     }
@@ -45,12 +46,23 @@ public class Statistics {
         this.totalTasksDoneByEachDay = totalTasksDoneByEachDay;
     }
 
-    public List<Object[]> getUsersRegistred() {
-        return usersRegistred;
+    public List<Object[]> getUsersRegistered() {
+        return usersRegistered;
     }
 
-    public void setUsersRegistred(List<Object[]> usersRegistred) {
-        this.usersRegistred = usersRegistred;
+    public void setUsersRegistered(List<Object[]> usersRegistered) {
+        this.usersRegistered = usersRegistered;
+    }
+
+    @Override
+    public String toString() {
+        return "Statistics{" +
+                "userStats=" + Arrays.toString(userStats) +
+                ", averageTaskTime=" + averageTaskTime +
+                ", categories=" + categories +
+                ", totalTasksDoneByEachDay=" + totalTasksDoneByEachDay +
+                ", usersRegistered=" + usersRegistered +
+                '}';
     }
 }
 

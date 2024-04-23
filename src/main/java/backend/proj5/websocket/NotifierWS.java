@@ -37,7 +37,6 @@ public class NotifierWS {
     }
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token){
-        System.out.println("***************** open NotifierWS");
         if (sessions.containsKey(token)) {
             return;
         }
@@ -61,7 +60,7 @@ public class NotifierWS {
 
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
-        System.out.println("******Websocket session is closed with CloseCode: " + reason.getCloseCode() + ": " + reason.getReasonPhrase());
+        System.out.println("Websocket session is closed with CloseCode: " + reason.getCloseCode() + ": " + reason.getReasonPhrase());
         sessions.entrySet().removeIf(entry -> entry.getValue().equals(session));
     }
 
