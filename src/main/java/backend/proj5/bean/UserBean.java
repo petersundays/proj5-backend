@@ -887,12 +887,13 @@ public class UserBean implements Serializable {
             List<Object[]> totalTasksDoneByEachDay = taskBean.totalTasksDoneByEachDay();
             statistics.setTotalTasksDoneByEachDay(totalTasksDoneByEachDay);
 
-            List<Object[]> usersRegistred = getTotalUsersRegisteredByEachDay();
-            statistics.setUsersRegistred(usersRegistred);
+            List<Object[]> usersRegistered = getTotalUsersRegisteredByEachDay();
+            statistics.setUsersRegistered(usersRegistered);
 
         } catch (Exception e) {
             System.out.println("Something went wrong!");
         }
+
         return statistics;
     }
 }
