@@ -26,12 +26,12 @@ public class UserService {
     public Response login(Login login) {
         User userLogged = userBean.login(login);
         Response response;
-
         if (userLogged != null) {
             response = Response.status(200).entity(userLogged).build();
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
+
         return response;
     }
 

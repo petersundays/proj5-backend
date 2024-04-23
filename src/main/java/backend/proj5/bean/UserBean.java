@@ -84,7 +84,6 @@ public class UserBean implements Serializable {
 
     //Permite ao utilizador entrar na app, gera token
     public User login(Login user) {
-
         UserEntity userEntity = userDao.findUserByUsername(user.getUsername());
 
         if (userEntity != null && userEntity.isVisible() && userEntity.isConfirmed()) {

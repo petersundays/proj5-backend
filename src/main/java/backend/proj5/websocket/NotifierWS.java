@@ -8,13 +8,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
-import jakarta.json.Json;
-import jakarta.json.JsonException;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
