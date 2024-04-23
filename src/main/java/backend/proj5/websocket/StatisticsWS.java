@@ -80,11 +80,9 @@ public class StatisticsWS {
 
     @OnMessage
     public void toDoOnMessage(Session session, String msg){
-        System.out.println("to do on message 1");
         Statistics statistics = null;
 
         try {
-            System.out.println("to do on message 2");
             statistics = userBean.getAllStatistics();
 
         } catch (Exception e) {
@@ -92,9 +90,7 @@ public class StatisticsWS {
         }
 
         if (statistics != null) {
-            System.out.println("to do on message 3");
             Statistics finalStatistics = statistics;
-            System.out.println("finalStatistics: " + finalStatistics);
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
                     .create();

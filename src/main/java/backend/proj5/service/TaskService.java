@@ -266,10 +266,9 @@ public Response getAllTasks(@HeaderParam("token") String token) {
 
 
     @DELETE
-    @Path("/{taskId}")
+    @Path("/delete/{taskId}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteTask(@HeaderParam("token") String token, @PathParam("taskId") String id) {
-
         Response response;
         if (userBean.isAuthenticated(token)) {
             if (userBean.userIsProductOwner(token)) {

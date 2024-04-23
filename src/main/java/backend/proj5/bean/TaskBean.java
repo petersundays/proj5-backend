@@ -7,6 +7,8 @@ import backend.proj5.dto.Task;
 import backend.proj5.dto.User;
 import backend.proj5.entity.TaskEntity;
 import backend.proj5.entity.UserEntity;
+import backend.proj5.websocket.TaskWS;
+import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import org.apache.logging.log4j.LogManager;
@@ -35,9 +37,8 @@ public class TaskBean implements Serializable {
     private CategoryBean categoryBean;
     @EJB
     private TaskBean taskBean;
-
-
-
+    @EJB
+    private TaskWS taskWS;
 
     public boolean newTask(Task task, String token) {
         boolean created = false;
@@ -123,6 +124,10 @@ public class TaskBean implements Serializable {
                     updatedTask.setConclusionDate(null);
                 }
                 taskDao.merge(updatedTask);
+                /*Gson gson = new Gson();
+                String json = gson.toJson(task);
+                taskWS.send(json);
+                */
                 edited = true;
             }
         }
@@ -165,13 +170,18 @@ public class TaskBean implements Serializable {
 
     public boolean permanentlyDeleteTask(String id) {
         boolean removed = false;
+
         TaskEntity taskEntity = taskDao.findTaskById(id);
         if (taskEntity != null && !taskEntity.getErased()) {
+
             taskDao.eraseTask(id);
             removed = true;
+
         } else if (taskEntity != null && taskEntity.getErased()) {
+
             taskDao.deleteTask(id);
             removed = true;
+            
         }
         return removed;
     }
