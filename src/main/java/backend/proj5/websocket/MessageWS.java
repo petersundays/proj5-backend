@@ -5,16 +5,14 @@ import backend.proj5.bean.UserBean;
 import backend.proj5.dto.Message;
 import backend.proj5.dto.User;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -25,8 +23,6 @@ public class MessageWS {
     private MessageBean messageBean;
     @EJB
     private UserBean userBean;
-    @EJB
-    private NotifierWS notifierWS;
 
     private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String token, String msg){
@@ -41,6 +37,7 @@ public class MessageWS {
     }
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token,@PathParam("receiver") String receiver){
+        System.out.println("***************** open MessageWS");
 
         if (userBean.isAuthenticated(token)) {
             sessions.put(token, session);
@@ -71,11 +68,12 @@ public class MessageWS {
         String receiver = userReceiver.getUsername();
         String content;
 
+        Gson gson = new Gson();
         try {
-            JsonObject jsonObject = Json.createReader(new StringReader(msg)).readObject();
-            content = jsonObject.getString("content");
+            JsonObject jsonObject = gson.fromJson(msg, JsonObject.class);
+            content = jsonObject.get("content").getAsString();
         } catch (JsonSyntaxException e) {
-            System.out.println("Invalid JSON format" + e.getMessage());
+            System.out.println("Invalid JSON format: " + e.getMessage());
             return;
         }
 

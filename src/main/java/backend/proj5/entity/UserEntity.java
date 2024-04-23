@@ -20,7 +20,7 @@ import java.util.Set;
 @NamedQuery(name = "User.findUserByUsernameAndPassword", query = "SELECT u FROM UserEntity u WHERE u.username = :username AND u.password = :password")
 @NamedQuery(name = "User.doesUserHavePasswordDefined", query = "SELECT CASE WHEN (u.password IS NULL OR TRIM(u.password) = '') THEN false ELSE true END FROM UserEntity u WHERE u.validationToken = :validationToken")
 @NamedQuery(name = "User.findUserByValidationToken", query = "SELECT u FROM UserEntity u WHERE u.validationToken = :validationToken")
-@NamedQuery(name = "User.countAllUsers", query = "SELECT COUNT(u) FROM UserEntity u WHERE LOWER(u.username) <> 'notassigned'")
+@NamedQuery(name = "User.countAllUsers", query = "SELECT COUNT(u) FROM UserEntity u")
 @NamedQuery(name = "User.countAllUsersByVisibility", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.visible = :visible")
 @NamedQuery(name = "User.countAllUsersByConfirmed", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.confirmed = :confirmed")
 @NamedQuery(name = "User.totalUsersRegisteredByEachDay", query = "SELECT u.registrationDate, (SELECT COUNT(v) FROM UserEntity v WHERE v.visible = true AND v.confirmed = true AND v.registrationDate <= u.registrationDate) FROM UserEntity u WHERE u.visible = true AND u.confirmed = true GROUP BY u.registrationDate ORDER BY u.registrationDate DESC ")
@@ -70,16 +70,16 @@ public class UserEntity implements Serializable{
     @Column(name="confirmed", nullable = false, unique = false, updatable = true)
     private boolean confirmed;
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<TaskEntity> userTasks;
 
-    @OneToMany(mappedBy = "sender", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<MessageEntity> sentMessages;
 
-    @OneToMany(mappedBy = "receiver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<MessageEntity> receivedMessages;
 
-    @OneToMany(mappedBy = "receiver", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<NotificationEntity> notifications;
 
 

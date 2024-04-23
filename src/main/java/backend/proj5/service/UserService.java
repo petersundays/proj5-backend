@@ -26,12 +26,12 @@ public class UserService {
     public Response login(Login login) {
         User userLogged = userBean.login(login);
         Response response;
-
         if (userLogged != null) {
             response = Response.status(200).entity(userLogged).build();
         } else {
             response = Response.status(401).entity("Invalid credentials").build();
         }
+
         return response;
     }
 
@@ -225,7 +225,7 @@ public class UserService {
         return response;
     }
 
-    //PATHestá desta forma e não 'visibility/{visible}', pq o pedido "getUser" nem sempre funcionava
+    //PATH está desta forma e não 'visibility/{visible}', pq o pedido "getUser" nem sempre funcionava
     // dava erro "multiple resources" com este pedido e com o"getUsers"
     @GET
     @Path("/visibility/{visible}")
