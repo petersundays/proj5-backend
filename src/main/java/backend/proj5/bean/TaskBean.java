@@ -4,11 +4,14 @@ import backend.proj5.dao.CategoryDao;
 import backend.proj5.dao.TaskDao;
 import backend.proj5.dao.UserDao;
 import backend.proj5.dto.Task;
+import backend.proj5.dto.TaskToSendWS;
 import backend.proj5.dto.User;
 import backend.proj5.entity.TaskEntity;
 import backend.proj5.entity.UserEntity;
+import backend.proj5.service.LocalDateAdapter;
 import backend.proj5.websocket.TaskWS;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import org.apache.logging.log4j.LogManager;
@@ -124,10 +127,7 @@ public class TaskBean implements Serializable {
                     updatedTask.setConclusionDate(null);
                 }
                 taskDao.merge(updatedTask);
-                /*Gson gson = new Gson();
-                String json = gson.toJson(task);
-                taskWS.send(json);
-                */
+
                 edited = true;
             }
         }
@@ -149,6 +149,17 @@ public class TaskBean implements Serializable {
                     taskEntity.setConclusionDate(null);
                 }
                 taskDao.merge(taskEntity);
+
+                Task task = convertTaskEntityToTaskDto(taskEntity);
+                TaskToSendWS taskToSendWS = new TaskToSendWS(TaskToSendWS.UPDATE, task);
+
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                        .create();
+
+                String json = gson.toJson(taskToSendWS);
+                taskWS.send(json);
+
                 updated = true;
             }
         }
