@@ -54,15 +54,5 @@ public class Statistics {
         this.usersRegistered = usersRegistered;
     }
 
-    @Override
-    public String toString() {
-        return "Statistics{" +
-                "userStats=" + Arrays.toString(userStats) +
-                ", averageTaskTime=" + averageTaskTime +
-                ", categories=" + categories +
-                ", totalTasksDoneByEachDay=" + totalTasksDoneByEachDay +
-                ", usersRegistered=" + usersRegistered +
-                '}';
-    }
 }
 

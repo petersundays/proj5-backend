@@ -48,7 +48,6 @@ public class StatisticsWS {
     public void toDoOnOpen(Session session, @PathParam("token") String token){
         System.out.println("A new WebSocket Statistics session is opened for client with token: " + token);
 
-        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
             sessions.put(token, session);
 
             Statistics statistics;
@@ -66,10 +65,6 @@ public class StatisticsWS {
                 System.out.println("Something went wrong!");
                 e.printStackTrace();
             }
-
-        } else {
-            System.out.println("User not authenticated or not a product owner");
-        }
     }
 
     @OnClose

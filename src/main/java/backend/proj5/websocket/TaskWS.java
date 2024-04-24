@@ -17,7 +17,6 @@ public class TaskWS {
 
     private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String msg){
-
         try {
             for (Session session : sessions.values()) {
                 if (session.isOpen())
