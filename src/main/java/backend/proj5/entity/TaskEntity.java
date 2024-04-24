@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @NamedQuery(name="Task.findTasksByCategory", query="SELECT a FROM TaskEntity a WHERE a.category = :category ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findNotErasedTasks", query="SELECT a FROM TaskEntity a WHERE a.erased = false ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findErasedTasks", query="SELECT a FROM TaskEntity a WHERE a.erased = true ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
+@NamedQuery(name="Task.findAllErasedTasksFromUser", query="SELECT a FROM TaskEntity a WHERE a.owner = :owner AND a.erased = true ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="Task.findAllTasks", query="SELECT a FROM TaskEntity a ORDER BY a.priority DESC, a.startDate ASC, a.limitDate ASC")
 @NamedQuery(name="DeleteTask", query="DELETE FROM TaskEntity a WHERE a.id = :id")
 @NamedQuery(name="Task.deleteAllErasedTasksFromUser", query="DELETE FROM TaskEntity a WHERE a.owner = :owner AND a.erased = true")
