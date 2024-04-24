@@ -53,6 +53,11 @@ public class TaskBean implements Serializable {
         task.setCategory(task.getCategory());
         if (validateTask(task)) {
             taskDao.persist(convertTaskToEntity(task));
+
+            Task createdTask = convertTaskEntityToTaskDto(taskDao.findTaskById(task.getId()));
+
+            addOrUpdateTaskWebsocket(TaskToSendWS.ADD, createdTask);
+
             created = true;
 
         }
@@ -128,6 +133,8 @@ public class TaskBean implements Serializable {
                 }
                 taskDao.merge(updatedTask);
 
+                addOrUpdateTaskWebsocket(TaskToSendWS.UPDATE, task);
+
                 edited = true;
             }
         }
@@ -151,14 +158,7 @@ public class TaskBean implements Serializable {
                 taskDao.merge(taskEntity);
 
                 Task task = convertTaskEntityToTaskDto(taskEntity);
-                TaskToSendWS taskToSendWS = new TaskToSendWS(TaskToSendWS.UPDATE, task);
-
-                Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
-                        .create();
-
-                String json = gson.toJson(taskToSendWS);
-                taskWS.send(json);
+                addOrUpdateTaskWebsocket(TaskToSendWS.UPDATE, task);
 
                 updated = true;
             }
@@ -167,13 +167,16 @@ public class TaskBean implements Serializable {
     }
 
 
-
     public boolean switchErasedTaskStatus(String id) {
         boolean swithedErased = false;
         TaskEntity taskEntity = taskDao.findTaskById(id);
         if(taskEntity != null) {
             taskEntity.setErased(!taskEntity.getErased());
             taskDao.merge(taskEntity);
+
+            Task task = convertTaskEntityToTaskDto(taskEntity);
+            addOrUpdateTaskWebsocket(TaskToSendWS.UPDATE, task);
+
             swithedErased = true;
         }
         return swithedErased;
@@ -186,11 +189,18 @@ public class TaskBean implements Serializable {
         if (taskEntity != null && !taskEntity.getErased()) {
 
             taskDao.eraseTask(id);
+
+            Task task = convertTaskEntityToTaskDto(taskEntity);
+            addOrUpdateTaskWebsocket(TaskToSendWS.UPDATE, task);
+
             removed = true;
 
         } else if (taskEntity != null && taskEntity.getErased()) {
 
             taskDao.deleteTask(id);
+
+            deleteTaskWebsocket(id);
+
             removed = true;
             
         }
@@ -258,6 +268,9 @@ public class TaskBean implements Serializable {
                 for (TaskEntity taskEntity : userTasks) {
                     taskEntity.setErased(true);
                     taskDao.merge(taskEntity);
+
+                    Task task = convertTaskEntityToTaskDto(taskEntity);
+                    addOrUpdateTaskWebsocket(TaskToSendWS.UPDATE, task);
                 }
                 erased = true;
             }
@@ -269,6 +282,11 @@ public class TaskBean implements Serializable {
         boolean erased = false;
         try {
             taskDao.eraseAllNotErasedTasks();
+            ArrayList<TaskEntity> tasks = taskDao.findErasedTasks();
+            for (TaskEntity taskEntity : tasks) {
+                Task task = convertTaskEntityToTaskDto(taskEntity);
+                addOrUpdateTaskWebsocket(TaskToSendWS.UPDATE, task);
+            }
             erased = true;
         } catch (Exception e) {
             erased = false;
@@ -285,6 +303,8 @@ public class TaskBean implements Serializable {
                 for (TaskEntity taskEntity : userTasks) {
                     taskEntity.setErased(false);
                     taskDao.merge(taskEntity);
+                    Task task = convertTaskEntityToTaskDto(taskEntity);
+                    addOrUpdateTaskWebsocket(TaskToSendWS.UPDATE, task);
                 }
                 restore = true;
             }
@@ -296,6 +316,11 @@ public class TaskBean implements Serializable {
         boolean restored = false;
         try {
             taskDao.restoreAllErasedTasks();
+            ArrayList<TaskEntity> tasks = taskDao.findNotErasedTasks();
+            for (TaskEntity taskEntity : tasks) {
+                Task task = convertTaskEntityToTaskDto(taskEntity);
+                addOrUpdateTaskWebsocket(TaskToSendWS.UPDATE, task);
+            }
             restored = true;
         } catch (Exception e) {
             restored = false;
@@ -308,8 +333,15 @@ public class TaskBean implements Serializable {
         boolean deleted = false;
         UserEntity userEntity = userDao.findUserByUsername(username);
         if (userEntity != null) {
-            taskDao.deleteAllTasksFromUser(userEntity);
-            deleted = true;
+            ArrayList<TaskEntity> userTasks = taskDao.findAllErasedTasksFromUser(userEntity);
+            if (userTasks != null) {
+                for (TaskEntity taskEntity : userTasks) {
+                    taskDao.deleteTask(taskEntity.getId());
+                    deleteTaskWebsocket(taskEntity.getId());
+                }
+                deleted = true;
+            }
+
         }
         return deleted;
     }
@@ -317,10 +349,14 @@ public class TaskBean implements Serializable {
     public boolean deleteAllErasedTasks () {
         boolean deleted = false;
          try {
-            taskDao.deleteAllErasedTasks();
-            deleted = true;
+             ArrayList<TaskEntity> tasks = taskDao.findErasedTasks();
+             taskDao.deleteAllErasedTasks();
+             for (TaskEntity taskEntity : tasks) {
+                 deleteTaskWebsocket(taskEntity.getId());
+             }
+             deleted = true;
         } catch (Exception e) {
-            deleted = false;
+             deleted = false;
          }
         return deleted;
     }
@@ -409,5 +445,29 @@ public class TaskBean implements Serializable {
 
     public List<Object[]> totalTasksDoneByEachDay() {
         return taskDao.totalTasksDoneByEachDay();
+    }
+
+    public void deleteTaskWebsocket(String id) {
+        TaskToSendWS taskToSendWS = new TaskToSendWS(TaskToSendWS.DELETE, id);
+
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                .create();
+
+        String json = gson.toJson(taskToSendWS);
+
+        taskWS.send(json);
+    }
+
+    public void addOrUpdateTaskWebsocket(String actionToDo, Task task) {
+        TaskToSendWS taskToSendWS = new TaskToSendWS(actionToDo, task);
+
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                .create();
+
+        String json = gson.toJson(taskToSendWS);
+
+        taskWS.send(json);
     }
 }
