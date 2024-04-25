@@ -11,7 +11,6 @@ public class Notification {
     private String receiver;
     private String sender;
     private Message message;
-    private String timeoutMessage;
 
     public Notification() {
     }
@@ -22,10 +21,6 @@ public class Notification {
         this.timestamp = new Timestamp(System.currentTimeMillis());
         this.read = false;
         this.message = message;
-    }
-
-    public Notification (String timeoutMessage) {
-        this.timeoutMessage = timeoutMessage;
     }
 
     public boolean isRead() {
@@ -68,11 +63,4 @@ public class Notification {
         this.message = message;
     }
 
-    public String getTimeoutMessage() {
-        return timeoutMessage;
-    }
-
-    public void setTimeoutMessage(String timeoutMessage) {
-        this.timeoutMessage = timeoutMessage;
-    }
 }
