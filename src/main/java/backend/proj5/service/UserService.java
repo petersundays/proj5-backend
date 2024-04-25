@@ -414,18 +414,33 @@ public class UserService {
     }
 
     @PUT
-    @Path("/cona/set-timeout")
+    @Path("/session/set-timeout")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateSessionTimeout(@HeaderParam("token") String token, int timeout) {
+    public Response updateSessionTimeout(@HeaderParam("token") String token, @HeaderParam("timeout") int timeout) {
         Response response;
-        System.out.println("timeout: " + timeout);
         if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
-            userBean.setSessionTimeout(timeout);
-            response = Response.status(200).entity("Session timeout updated").build();
+            if (userBean.setSessionTimeout(timeout)) {
+                response = Response.status(200).entity("Session timeout updated").build();
+            } else {
+                response = Response.status(500).entity("Timeout must be between 1 and 60 minutes").build();
+            }
         } else {
             response = Response.status(401).entity("You don't have permission").build();
         }
         return response;
     }
 
+    @GET
+    @Path("/session/get-timeout")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSessionTimeout(@HeaderParam("token") String token) {
+        Response response;
+        if (userBean.isAuthenticated(token)) {
+            int timeout = userBean.getSessionTimeout();
+            response = Response.status(200).entity(timeout).build();
+        } else {
+            response = Response.status(401).entity("You don't have permission").build();
+        }
+        return response;
+    }
 }

@@ -934,7 +934,18 @@ public class UserBean implements Serializable {
         userDao.updateLastAccess(username, lastAccess);
     }
 
-    public void setSessionTimeout(int timeout) {
-        userDao.updateSessionTimeout(timeout);
+    public boolean setSessionTimeout(int timeout) {
+        boolean updated = false;
+
+
+        if (timeout >= 1 && timeout <= 60) {
+            userDao.updateSessionTimeout(timeout);
+            updated = true;
+        }
+        return updated;
+    }
+
+    public int getSessionTimeout() {
+        return userDao.getSessionTimeout();
     }
 }
