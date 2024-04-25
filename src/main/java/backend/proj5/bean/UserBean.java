@@ -2,13 +2,10 @@ package backend.proj5.bean;
 
 import backend.proj5.dao.TaskDao;
 import backend.proj5.dao.UserDao;
-import backend.proj5.dto.Login;
-import backend.proj5.dto.Statistics;
-import backend.proj5.dto.Task;
-import backend.proj5.dto.User;
+import backend.proj5.dto.*;
 import backend.proj5.entity.TaskEntity;
 import backend.proj5.entity.UserEntity;
-import com.google.gson.Gson;
+import backend.proj5.websocket.NotifierWS;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import org.mindrot.jbcrypt.BCrypt;
@@ -20,6 +17,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -38,6 +36,8 @@ public class UserBean implements Serializable {
     private EmailBean emailBean;
     @EJB
     private CategoryBean categoryBean;
+    @EJB
+    NotifierWS notifierWS;
 
     public UserBean(){}
 
@@ -93,6 +93,7 @@ public class UserBean implements Serializable {
 
                 String token = generateNewToken();
                 userEntity.setToken(token);
+                userDao.updateLastAccess(userEntity.getUsername(), LocalDateTime.now());
                 User userDto = convertUserEntitytoUserDto(userEntity);
                 return createUserLogged(userDto);
             }
@@ -300,9 +301,21 @@ public class UserBean implements Serializable {
 
         if (u != null) {
             u.setToken(null);
+            u.setLastAccess(null);
             return true;
         }
         return false;
+    }
+
+    public void timeoutLogout (String token) {
+        UserEntity u = userDao.findUserByToken(token);
+        if (u != null) {
+            u.setToken(null);
+            u.setLastAccess(null);
+            userDao.merge(u);
+            String timeoutNotification = "Session expired. Please login again.";
+            notifierWS.send(token, timeoutNotification);
+        }
     }
 
     public ArrayList<User> getUsers() {
@@ -503,8 +516,19 @@ public class UserBean implements Serializable {
 
         boolean validUser = false;
         UserEntity user = userDao.findUserByToken(token);
-        if (user != null && user.isVisible()) {
-            validUser = true;
+        if (user != null && user.isVisible() && user.isConfirmed()) {
+            int sessionTimeout = userDao.getSessionTimeout();
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime lastAccess = user.getLastAccess();
+            long minutes = ChronoUnit.MINUTES.between(lastAccess, now);
+
+            if (minutes < sessionTimeout) {
+                user.setLastAccess(now);
+                userDao.merge(user);
+                validUser = true;
+            } else {
+                timeoutLogout(token);
+            }
         }
 
         return validUser;
@@ -577,7 +601,7 @@ public class UserBean implements Serializable {
 
         UserEntity u = userDao.findUserByPhone(user.getPhone());
 
-        while (status && i < user.getPhone().length() - 1) {
+         while (status && i < user.getPhone().length() - 1) {
             if (user.getPhone().length() == 9) {
                 for (; i < user.getPhone().length(); i++) {
                     if (!Character.isDigit(user.getPhone().charAt(i))) {
@@ -608,6 +632,9 @@ public class UserBean implements Serializable {
         int i = 0;
 
         UserEntity u = userDao.findUserByPhone(user.getPhone());
+        if (u != null && u.getPhone().equals(user.getPhone())) {
+            return true;
+        }
 
         while (status && i < user.getPhone().length() - 1) {
             if (user.getPhone().length() == 9) {
@@ -895,5 +922,18 @@ public class UserBean implements Serializable {
         }
 
         return statistics;
+    }
+
+    public LocalDateTime getLastAccess(String username) {
+        UserEntity user = userDao.findUserByUsername(username);
+        return user.getLastAccess();
+    }
+
+    public void updateLastAccess(String username, LocalDateTime lastAccess) {
+        userDao.updateLastAccess(username, lastAccess);
+    }
+
+    public void setSessionTimeout(int timeout) {
+        userDao.updateSessionTimeout(timeout);
     }
 }

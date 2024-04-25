@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -24,6 +25,8 @@ import java.util.Set;
 @NamedQuery(name = "User.countAllUsersByVisibility", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.visible = :visible")
 @NamedQuery(name = "User.countAllUsersByConfirmed", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.confirmed = :confirmed")
 @NamedQuery(name = "User.totalUsersRegisteredByEachDay", query = "SELECT u.registrationDate, (SELECT COUNT(v) FROM UserEntity v WHERE v.visible = true AND v.confirmed = true AND v.registrationDate <= u.registrationDate) FROM UserEntity u WHERE u.visible = true AND u.confirmed = true GROUP BY u.registrationDate ORDER BY u.registrationDate DESC ")
+@NamedQuery(name = "User.updateLastAccess", query = "UPDATE UserEntity u SET u.lastAccess = :lastAccess WHERE u.username = :username")
+@NamedQuery(name = "User.findLastAccess", query = "SELECT u.lastAccess FROM UserEntity u WHERE u.username = :username")
 
 public class UserEntity implements Serializable{
 
@@ -69,6 +72,9 @@ public class UserEntity implements Serializable{
 
     @Column(name="confirmed", nullable = false, unique = false, updatable = true)
     private boolean confirmed;
+
+    @Column(name="last_access", nullable = true, unique = false, updatable = true)
+    private LocalDateTime lastAccess;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<TaskEntity> userTasks;
@@ -206,6 +212,14 @@ public class UserEntity implements Serializable{
     public boolean isConfirmed() {return confirmed;}
 
     public void setConfirmed(boolean confirmed) {this.confirmed = confirmed;}
+
+    public LocalDateTime getLastAccess() {
+        return lastAccess;
+    }
+
+    public void setLastAccess(LocalDateTime lastAccess) {
+        this.lastAccess = lastAccess;
+    }
 
     public void addNewTasks (ArrayList<TaskEntity> tasks) {
         userTasks.addAll(tasks);

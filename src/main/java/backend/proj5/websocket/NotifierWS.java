@@ -25,6 +25,7 @@ public class NotifierWS {
 
     private final HashMap<String, Session> sessions = new HashMap<String, Session>();
     public void send(String token, String msg){
+        System.out.println("Message is sent: " + msg);
         Session session = sessions.get(token);
         if (session != null){
 

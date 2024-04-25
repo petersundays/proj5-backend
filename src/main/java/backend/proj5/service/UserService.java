@@ -144,7 +144,7 @@ public class UserService {
             if (!updated) {
                 return Response.status(400).entity("User with this username is not found").build();
             }else return Response.status(200).entity("Password updated").build();
-        }else
+        } else
             return Response.status(401).entity("User is not logged in").build();
     }
 
@@ -410,6 +410,21 @@ public class UserService {
             response = Response.status(401).entity("You don't have permission").build();
         }
 
+        return response;
+    }
+
+    @PUT
+    @Path("/cona/set-timeout")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateSessionTimeout(@HeaderParam("token") String token, int timeout) {
+        Response response;
+        System.out.println("timeout: " + timeout);
+        if (userBean.isAuthenticated(token) && userBean.userIsProductOwner(token)) {
+            userBean.setSessionTimeout(timeout);
+            response = Response.status(200).entity("Session timeout updated").build();
+        } else {
+            response = Response.status(401).entity("You don't have permission").build();
+        }
         return response;
     }
 
