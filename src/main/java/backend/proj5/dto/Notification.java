@@ -11,6 +11,8 @@ public class Notification {
     private String receiver;
     private String sender;
     private Message message;
+    private String sessionExpired;
+    public static final String EXPIRED = "expired";
 
     public Notification() {
     }
@@ -21,6 +23,10 @@ public class Notification {
         this.timestamp = new Timestamp(System.currentTimeMillis());
         this.read = false;
         this.message = message;
+    }
+
+    public Notification(String sessionExpired) {
+        this.sessionExpired = EXPIRED;
     }
 
     public boolean isRead() {
@@ -61,6 +67,14 @@ public class Notification {
 
     public void setMessage(Message message) {
         this.message = message;
+    }
+
+    public String getSessionExpired() {
+        return sessionExpired;
+    }
+
+    public void setSessionExpired(String sessionExpired) {
+        this.sessionExpired = sessionExpired;
     }
 
 }
