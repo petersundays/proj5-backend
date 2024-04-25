@@ -62,4 +62,5 @@ public class Notification {
     public void setMessage(Message message) {
         this.message = message;
     }
+
 }

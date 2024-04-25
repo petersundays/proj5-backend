@@ -1,9 +1,12 @@
 package backend.proj5.dao;
 
+import backend.proj5.entity.SessionTimeOutEntity;
 import backend.proj5.entity.UserEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -153,4 +156,37 @@ public class UserDao extends AbstractDao<UserEntity> {
 		}
 	}
 
+	public int getSessionTimeout() {
+		try {
+			SessionTimeOutEntity sessionTimeOutEntity = (SessionTimeOutEntity) em.createNamedQuery("SessionTimeOut.findTimeout").getSingleResult();
+            return sessionTimeOutEntity.getTimeout();
+		} catch (Exception e) {
+			System.out.println("Error getting session timeout" + e.getMessage());
+			return 0;
+		}
+	}
+
+	public void updateSessionTimeout(int timeout) {
+		try {
+			em.createNamedQuery("SessionTimeOut.updateTimeout").setParameter("timeout", timeout).executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public LocalDateTime getLastAccess(String username) {
+		try {
+			return (LocalDateTime) em.createNamedQuery("User.findLastAccess").setParameter("username", username).getSingleResult();
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public void updateLastAccess(String username, LocalDateTime lastAccess) {
+		try {
+			em.createNamedQuery("User.updateLastAccess").setParameter("username", username).setParameter("lastAccess", lastAccess).executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
