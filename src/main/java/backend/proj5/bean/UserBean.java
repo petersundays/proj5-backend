@@ -6,6 +6,7 @@ import backend.proj5.dto.*;
 import backend.proj5.entity.TaskEntity;
 import backend.proj5.entity.UserEntity;
 import backend.proj5.websocket.NotifierWS;
+import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import org.mindrot.jbcrypt.BCrypt;
@@ -313,8 +314,8 @@ public class UserBean implements Serializable {
             u.setToken(null);
             u.setLastAccess(null);
             userDao.merge(u);
-            String timeoutNotification = "Session expired. Please login again.";
-            notifierWS.send(token, timeoutNotification);
+            Notification timeoutNotification = new Notification(Notification.EXPIRED);
+            notifierWS.send(token, new Gson().toJson(timeoutNotification));
         }
     }
 
@@ -933,7 +934,18 @@ public class UserBean implements Serializable {
         userDao.updateLastAccess(username, lastAccess);
     }
 
-    public void setSessionTimeout(int timeout) {
-        userDao.updateSessionTimeout(timeout);
+    public boolean setSessionTimeout(int timeout) {
+        boolean updated = false;
+
+
+        if (timeout >= 1 && timeout <= 60) {
+            userDao.updateSessionTimeout(timeout);
+            updated = true;
+        }
+        return updated;
+    }
+
+    public int getSessionTimeout() {
+        return userDao.getSessionTimeout();
     }
 }
