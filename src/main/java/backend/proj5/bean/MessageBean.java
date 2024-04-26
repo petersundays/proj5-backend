@@ -81,7 +81,7 @@ public class MessageBean implements Serializable {
     }
 
     public Message convertMessageEntityToDto(MessageEntity messageEntity) {
-        return new Message(messageEntity.getContent(), messageEntity.getSender().getUsername(), messageEntity.getReceiver().getUsername());
+        return new Message(messageEntity.getContent(), messageEntity.getSender().getUsername(), messageEntity.getReceiver().getUsername(), messageEntity.getTimestamp(), messageEntity.isRead());
     }
 
     public ArrayList<Message> getMessages(String token, String receiver) {
