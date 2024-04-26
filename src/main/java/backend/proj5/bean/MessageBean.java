@@ -13,6 +13,7 @@ import backend.proj5.websocket.NotifierWS;
 import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import java.io.Serializable;
@@ -60,6 +61,7 @@ public class MessageBean implements Serializable {
                 }
             }
 
+            userBean.updateLastAccess(sender.getUsername(), LocalDateTime.now());
             sent = true;
         }
 
