@@ -23,6 +23,14 @@ public class Message {
         this.read = false;
     }
 
+    public Message(String content, String sender, String receiver, Timestamp timestamp, Boolean read) {
+        this.content = content;
+        this.sender = sender;
+        this.receiver = receiver;
+        this.timestamp = timestamp;
+        this.read = read;
+    }
+
     public String getContent() {
         return content;
     }
