@@ -6,6 +6,8 @@ import jakarta.ejb.Stateless;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 import java.util.Properties;
@@ -16,6 +18,7 @@ public class EmailBean {
     @EJB
     private UserBean userBean;
 
+    private static final Logger logger = LogManager.getLogger(TaskBean.class);
     private final String username = "pedro_domingos10@hotmail.com";
     private final String password = System.getenv("SMTP_PASSWORD");
     private final String host = "smtp.office365.com"; //"smtp-mail.outlook.com" estava assim definido primeiro e começou a dar erro
@@ -24,6 +27,7 @@ public class EmailBean {
     public EmailBean() {}
 
     public boolean sendEmail(String to, String subject, String body) {
+        logger.info("Sending email to: {}", to);
         boolean sent = false;
 
         Properties props = new Properties();
@@ -35,6 +39,7 @@ public class EmailBean {
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
+                logger.info("Authenticating email");
                 return new PasswordAuthentication(username, password);
             }
         });
@@ -48,15 +53,20 @@ public class EmailBean {
 
             Transport.send(message);
             sent = true;
+
+            logger.info("Email sent to: {}", to);
+
         } catch (MessagingException e) {
             sent = false;
             e.printStackTrace();
+            logger.error("Email not sent to: {}", to);
         }
 
         return sent;
     }
 
     public boolean sendConfirmationEmail(User user, String validationToken) {
+        logger.info("Sending confirmation email to: {}", user.getEmail());
 
         boolean sent = false;
 
@@ -69,13 +79,16 @@ public class EmailBean {
 
         if (sendEmail(userEmail, subject, body)) {
             sent = true;
+            logger.info("Confirmation email sent to: {}", userEmail);
         } else {
             userBean.delete(user.getUsername());
+            logger.error("Confirmation email not sent to: {}", userEmail);
         }
         return sent;
     }
 
     public boolean sendPasswordResetEmail(String email, String firstName, String validationToken) {
+        logger.info("Sending password reset email to: {}", email);
         boolean sent = false;
 
         String subject = "Agile Scrum - Password Reset";
@@ -86,6 +99,9 @@ public class EmailBean {
 
         if (sendEmail(email, subject, body)) {
             sent = true;
+            logger.info("Password reset email sent to: {}", email);
+        } else {
+            logger.error("Password reset email not sent to: {}", email);
         }
 
         return sent;
