@@ -44,7 +44,6 @@ public class MessageBean implements Serializable {
 
     public boolean sendMessage(String content, User sender, User receiver, String token, boolean receiverOnline) {
         boolean sent = false;
-        
 
         if (sender != null && receiver != null) {
             logger.info("Sending message from: {} to: {}", sender.getUsername(), receiver.getUsername());
