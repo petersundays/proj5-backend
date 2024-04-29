@@ -413,6 +413,18 @@ public class UserBean implements Serializable {
         return new ArrayList<>();
     }
 
+    public ArrayList<UserEntity> findAllUsers() {
+        logger.info("Finding all users");
+
+        ArrayList<UserEntity> userEntities = userDao.findAllUsers();
+        if (userEntities != null) {
+            logger.info("Users found");
+            return userEntities;
+        }
+        //Retorna uma lista vazia se não forem encontrados users
+        return new ArrayList<>();
+    }
+
     //Receber users pelo tipo de user
     public ArrayList<User> getUsersByType(int typeOfUser) {
         logger.info("Finding users by type: {}", typeOfUser);
@@ -1067,6 +1079,20 @@ public class UserBean implements Serializable {
             }
         }
         return sent;
+    }
+
+    public void removeValidationToken(String username) {
+        logger.info("Removing validation token");
+
+        UserEntity user = userDao.findUserByUsername(username);
+        if (user != null) {
+            logger.info("User found: {}", user.getUsername());
+            user.setValidationToken(null);
+            userDao.merge(user);
+            logger.info("Validation token removed for user: {}", user.getUsername());
+        } else {
+            logger.error("User not found: {}", username);
+        }
     }
 
     public int countAllUsers() {
