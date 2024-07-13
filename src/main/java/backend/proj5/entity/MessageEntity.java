@@ -19,7 +19,7 @@ public class MessageEntity implements Serializable {
         @Column (name="id", nullable = false, unique = true, updatable = false)
         private int id;
 
-        @Column (name="content", nullable = false, unique = false, length = 20000, columnDefinition = "TEXT")
+        @Column (name="content", nullable = false, length = 20000, columnDefinition = "TEXT")
         private String content;
 
         @ManyToOne
@@ -30,10 +30,10 @@ public class MessageEntity implements Serializable {
         @JoinColumn(name = "receiver_id", referencedColumnName = "username")
         private UserEntity receiver;
 
-        @Column (name="timestamp", nullable = false, unique = false, updatable = false)
+        @Column (name="timestamp", nullable = false, updatable = false)
         private Timestamp timestamp;
 
-        @Column (name="'read'", nullable = false, unique = false)
+        @Column (name="'read'", nullable = false)
         private boolean read;
 
         @OneToOne(mappedBy = "message")
